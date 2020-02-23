@@ -1,0 +1,365 @@
+{
+    "customHeight": 18,
+    "tabulator": {
+        "responsiveLayout": "collapse",
+        "responsiveLayoutCollapseStartOpen": false,
+        "index": "$topic",
+        "layout": "fitColumns",
+        "movableColumns": true,
+        "groupBy": "",
+        "columns": [
+            {
+                "formatter": "responsiveCollapse",
+                "width": 30,
+                "minWidth": 30,
+                "align": "center",
+                "resizable": false,
+                "headerSort": false,
+                "frozen": true,
+                "title": "Expand&nbsp;&nbsp;<i class='fa fa-plus-circle'></i> ",
+                "field": "expand",
+                "headerVertical": "flip",
+                "headerTooltip": "click to expand more details",
+                "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+            },
+            {
+                "formatter": "function(cell, formatterParams, onRendered) {      var html = cell.getValue(); return html;  }",
+                "title": "State&nbsp;&nbsp;<i class='fa fa-bolt fa-rotate-90'></i>",
+                "field": "$stateIcon",
+                "width": 100,
+                "align": "center",
+                "frozen": true,
+                "headerVertical": "flip",
+                "headerTooltip": "current state as icon: init, ready, lost, sleeping, disconnected or alert",
+                "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+            },
+            {
+                "formatter": "function(cell, formatterParams, onRendered) {     var html = cell.getValue(); return html;  }",
+                "title": "Signal&nbsp;&nbsp;<i class='fa fa-signal fa-rotate-90'></i>",
+                "field": "signalIcon",
+                "width": 100,
+                "align": "center",
+                "frozen": true,
+                "headerVertical": "flip",
+                "headerTooltip": "signal quality for wireless devices (signalIcon)",
+                "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+            },
+            {
+                "title": "Name&nbsp;&nbsp;<i class='fa fa-tag fa-rotate-90'></i>",
+                "field": "$name",
+                "width": 100,
+                "frozen": true,
+                "tooltip": true,
+                "headerVertical": "flip",
+                "headerTooltip": "name of the device ($name)",
+                "editor": "input",
+                "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContextNoHide'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+            },
+            {
+                "title": "State&nbsp;&nbsp;<i class='fa fa-star-half-o'></i> ",
+                "field": "$state",
+                "width": 100,
+                "align": "center",
+                "headerVertical": "flip",
+                "headerTooltip": "current state: init, ready, lost, sleeping, disconnected or alert",
+                "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+            },
+            {
+                "title": "last seen&nbsp;&nbsp;<i class='fa fa-clock-o fa-rotate-90'></i>",
+                "field": "lastSeenreadyFormatted",
+                "width": 100,
+                "align": "right",
+                "tooltip": true,
+                "headerVertical": "flip",
+                "headerTooltip": "time since the device was sending $state updates",
+                "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+            },
+            {
+                "title": "Location&nbsp;&nbsp;<i class='fa fa-map-marker fa-rotate-90'></i>",
+                "field": "room",
+                "width": 100,
+                "headerTooltip": "location of the device (room)",
+                "tooltip": true,
+                "headerVertical": "flip",
+                "editor": "autocomplete",
+                "editorParams": {
+                    "freetext": true,
+                    "allowEmpty": true,
+                    "showListOnEmpty": true,
+                    "values": true
+                },
+                "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+            },
+            {
+                "title": "<i class='fa fa-area-chart'></i> Statistics",
+                "columns": [
+                    {
+                        "title": "<i class='fa fa-undo'></i>",
+                        "field": "interval",
+                        "width": 100,
+                        "headerVertical": true,
+                        "headerTooltip": "device update interval",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    },
+                    {
+                        "formatterParams": {
+                            "outputFormat": "d hh:mm:ss",
+                            "inputFormat": "seconds",
+                            "invalidPlaceholder": "(unknown)"
+                        },
+                        "title": "<i class='fa fa-clock-o'></i>",
+                        "field": "uptime",
+                        "formatter": "function(cell, formatterParams, onRendered){     var pad = function (num) {         return (\"0\"+num).slice(-2);     };     var secs = Number(cell.getValue());     if (Number.isNaN(secs)) return;     var minutes = Math.floor(secs / 60);     secs = secs%60;     var hours = Math.floor(minutes/60);     minutes = minutes%60;     var days = Math.floor(hours/24);     hours = hours%24;     if (days>0)         return days+\"d \"+pad(hours)+\":\"+pad(minutes);     else         return pad(hours)+\":\"+pad(minutes)+\":\"+pad(secs); }",
+                        "width": 100,
+                        "headerVertical": true,
+                        "headerTooltip": "device uptime",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    },
+                    {
+                        "formatterParams": {
+                            "min": 0,
+                            "max": 100,
+                            "color": [
+                                "red",
+                                "orange",
+                                "green"
+                            ],
+                            "legend": "function (value) {if (value>0) return \"<span style='color:#FFFFFF;'>\"+value+\" %</span>\"; else return; }",
+                            "legendColor": "#FFFFFF",
+                            "legendAlign": "center"
+                        },
+                        "title": "<i class='fa fa-signal'></i>",
+                        "field": "signal",
+                        "formatter": "progress",
+                        "width": 100,
+                        "headerVertical": true,
+                        "headerTooltip": "device wireless signal quality",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    },
+                    {
+                        "formatterParams": {
+                            "min": 2.5,
+                            "max": 3.5,
+                            "color": [
+                                "red",
+                                "green",
+                                "red"
+                            ],
+                            "legend": "function (value) { if (value>0) return \"<span style='color:#FFFFFF;'>\"+value+\" V</span>\"; else return; }",
+                            "legendColor": "#101010",
+                            "legendAlign": "center"
+                        },
+                        "title": "<i class='fa fa-plug'></i>",
+                        "field": "supply",
+                        "formatter": "progress",
+                        "width": 100,
+                        "headerVertical": true,
+                        "headerTooltip": "device supply voltage",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    },
+                    {
+                        "formatterParams": {
+                            "min": 0,
+                            "max": 100,
+                            "color": [
+                                "red",
+                                "orange",
+                                "green"
+                            ],
+                            "legend": "function (value) {     if (value>0)         return \"<span style='color:#FFFFFF;'>\"+value+\" %</span>\";     else         return; }",
+                            "legendColor": "#101010",
+                            "legendAlign": "center"
+                        },
+                        "title": "<i class='fa fa-battery-2'></i>",
+                        "field": "battery",
+                        "formatter": "progress",
+                        "width": 100,
+                        "headerVertical": true,
+                        "headerTooltip": "device battery level in %",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    },
+                    {
+                        "formatterParams": {
+                            "min": 0,
+                            "max": 100000,
+                            "color": [
+                                "red",
+                                "orange",
+                                "green"
+                            ],
+                            "legend": "function (value) { if (value>0) return \"<span style='color:#FFFFFF;'>\"+(value/1024).toFixed(2)+\" kB</span>\"; else return; }",
+                            "legendColor": "#101010",
+                            "legendAlign": "right"
+                        },
+                        "title": "<i class='fa fa-microchip'></i>",
+                        "field": "freeheap",
+                        "formatter": "progress",
+                        "width": 100,
+                        "headerVertical": true,
+                        "headerTooltip": "device free heap memory in kb",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    },
+                    {
+                        "formatterParams": {
+                            "min": 0,
+                            "max": 100,
+                            "color": [
+                                "red",
+                                "orange",
+                                "green"
+                            ],
+                            "legend": "function (value) {     if (value>0)         return \"<span style='color:#FFFFFF;'>\"+value+\" %</span>\";     else         return; }",
+                            "legendColor": "#101010",
+                            "legendAlign": "right"
+                        },
+                        "title": "<i class='fa fa-tasks'></i>",
+                        "field": "cpuload",
+                        "formatter": "progress",
+                        "width": 100,
+                        "headerVertical": true,
+                        "headerTooltip": "device cpu load in %",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    },
+                    {
+                        "formatterParams": {
+                            "min": 20,
+                            "max": 60,
+                            "color": [
+                                "green",
+                                "orange",
+                                "red"
+                            ],
+                            "legend": "function (value) { if (value>0) return \"<span style='color:#FFFFFF;'>\"+value+\" °C</span>\"; else return; }",
+                            "legendColor": "#101010",
+                            "legendAlign": "right"
+                        },
+                        "title": "<i class='fa fa-thermometer-half'></i>",
+                        "field": "cputemp",
+                        "formatter": "progress",
+                        "width": 100,
+                        "headerVertical": true,
+                        "headerTooltip": "device cpu temperature in °C",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    }
+                ]
+            },
+            {
+                "title": "<i class='fa fa-code'></i>Firmware",
+                "columns": [
+                    {
+                        "formatter": "link",
+                        "formatterParams": {
+                            "labelField": "$localip",
+                            "urlPrefix": "http://",
+                            "target": "_blank"
+                        },
+                        "title": "IP",
+                        "field": "$localip",
+                        "width": 100,
+                        "headerTooltip": "device local IP-Address ($localip)",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    },
+                    {
+                        "title": "mac",
+                        "field": "$mac",
+                        "width": 100,
+                        "headerTooltip": "device mac address ($mac)",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    },
+                    {
+                        "title": "Access Point",
+                        "field": "SSID",
+                        "width": 100,
+                        "headerTooltip": "access point the device device is connected to (provided by http json request)"
+                    },
+                    {
+                        "title": "Firmware",
+                        "field": "name",
+                        "width": 100,
+                        "headerTooltip": "name of the firmware ($fw/name)",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    },
+                    {
+                        "title": "Version",
+                        "field": "version",
+                        "width": 100,
+                        "headerTooltip": "version of the firmware ($fw/version)",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    },
+                    {
+                        "title": "Homie",
+                        "field": "$homie",
+                        "width": 100,
+                        "align": "left",
+                        "headerVertical": "flip",
+                        "headerTooltip": "homie version ($version)",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    },
+                    {
+                        "title": "Platform",
+                        "field": "$implementation",
+                        "width": 100,
+                        "align": "left",
+                        "headerVertical": "flip",
+                        "headerTooltip": "name of the platform ($implementation)",
+                        "tooltip": true,
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    },
+                    {
+                        "title": "Last Boot Cause",
+                        "field": "lastBootCause",
+                        "width": 100,
+                        "headerTooltip": "last cause of reboot (provided by http json request)"
+                    },
+                    {
+                        "title": "Reset Reason",
+                        "field": "resetReason",
+                        "width": 100,
+                        "headerTooltip": "last reason of reset (provided by http json request)",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    },
+                    {
+                        "title": "Reset Count",
+                        "field": "resetTotal",
+                        "width": 100,
+                        "headerTooltip": "number of resets (provided by resetCounter node)",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    },
+                    {
+                        "title": "avg. uptime",
+                        "field": "resetAverage",
+                        "width": 100,
+                        "headerTooltip": "average uptime between resets (provided by resetCounter node)",
+                        "formatter": "function(cell, formatterParams, onRendered){     var pad = function (num) {         return (\"0\"+num).slice(-2);     };     var secs = Number(cell.getValue());     if (Number.isNaN(secs)) return;     var minutes = Math.floor(secs / 60);     secs = secs%60;     var hours = Math.floor(minutes/60);     minutes = minutes%60;     var days = Math.floor(hours/24);     hours = hours%24;     if (days>0)         return days+\"d \"+pad(hours)+\":\"+pad(minutes);     else         return pad(hours)+\":\"+pad(minutes)+\":\"+pad(secs); }",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    },
+                    {
+                        "formatterParams": {
+                            "min": 0,
+                            "max": 100,
+                            "color": [
+                                "red",
+                                "orange",
+                                "green"
+                            ],
+                            "legend": "function (value) {     if (value>0)         return \"<span style='color:#FFFFFF;'>\"+Number(value).toFixed(2)+\" %</span>\";     else         return; }",
+                            "legendColor": "#101010",
+                            "legendAlign": "center"
+                        },
+                        "formatter": "progress",
+                        "title": "<i class='fa fa-moon-o'></i> sleep ratio",
+                        "field": "sleepRatio",
+                        "width": 100,
+                        "headerTooltip": "ratio between sleep and awake (provided by sleepTimer node)",
+                        "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
+                    }
+                ]
+            }
+        ],
+        "columnResized": "function(column){     var newColumn = {         field: column._column.field,         visible: column._column.visible,         width: column._column.width,         widthFixed: column._column.widthFixed,         widthStyled: column._column.widthStyled     }; this.send({topic:this.config.topic,ui_control:{callback:'columnResized',columnWidths:newColumn}}); }",
+        "columnMoved": "function(column, columns){     var newColumns=[];     columns.forEach(function (column) {         newColumns.push({'field': column._column.definition.field, 'title': column._column.definition.title});     });     this.send({topic:this.config.topic,ui_control:{callback:'columnMoved',columns:newColumns}}); }",
+        "rowFormatter": "function(row){     var data = row.getData();     switch (data.$state) {         case \"lost\":             row.getElement().style.backgroundColor = \"#9e2e66\";             row.getElement().style.color = \"#a6a6a6\";             break;         case \"sleeping\":             row.getElement().style.backgroundColor = \"#336699\";             break;         case \"disconnected\":             row.getElement().style.backgroundColor = \"#cc3300\";             row.getElement().style.color = \"#a6a6a6\";             break;         case \"alert\":             row.getElement().style.backgroundColor = \"#A6A6DF\";             break;         case \"init\":             row.getElement().style.backgroundColor = \"#f2f20d\";             break;         case \"ready\":             row.getElement().style.backgroundColor = \"\";             row.getElement().style.color = \"\";             break;         } }",
+        "rowContext": "function(e, row){     this.send({ui_control:{callback:'rowContext'},position:{\"x\":e.x,\"y\":e.y},payload:row._row.data.$name,\"$topic\":row._row.data.$topic});     e.preventDefault(); }",
+        "cellEdited": "function(cell){     this.send({ui_control:{callback:'cellEdited'},         payload:cell._cell.value,         \"oldValue\":cell._cell.oldValue,         \"field\":cell._cell.column.field,         \"$topic\":cell._cell.row.data.$topic}); }"
+    }
+}

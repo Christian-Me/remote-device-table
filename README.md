@@ -3,7 +3,7 @@ Node-RED flow to display the status of remote devices on the dashboard using ui-
 
 **first beta version**
 
-
+![screenshot](https://github.com/Christian-Me/remote-device-table/blob/master/screenshots/teaser.png?raw=true)
 ## introduction
 >In IOT or home automation environments there are normally many remote devices connected to Node-RED sometimes over wireless connections. This flow gives a dynamic overview of all devices with their last status messages and system health information.
 
@@ -45,11 +45,11 @@ Node-RED flow to display the status of remote devices on the dashboard using ui-
 
 The flow is divided in three main parts
 
-1. **data acquisition**: translation of the data into homie and individual user defined fields (not everything fits into the homie convention but it is a good common ground)
+1. **data acquisition**: translation of the data into homie and individual user defined fields (not everything fits into the homie convention but it is a good common ground). [different translator nodes can be found here](https://github.com/Christian-Me/remote-device-table/tree/master/translators)
 
-2. **plugins**: little nodes doing all kind of stuff with this data. For example a watchdog, a reset counter, max. min. or avg. uptime, add icons from the values like battery or signal and other things. To make these reusable it is essential to have a common data-set defined.
+2. **plugins**: little nodes doing all kind of stuff with this data. For example a watchdog, a reset counter, max. min. or avg. uptime, add icons from the values like battery or signal and other things. To make these reusable it is essential to have a common data-set defined. [different plugins can be found here](https://github.com/Christian-Me/remote-device-table/tree/master/plugins)
 
-3. **table handling and ui design**: universal flow to handle table formatting, data storage, column width and order, cell editing and interactive stuff like context menus.
+3. **table handling and ui design**: universal flow to handle table formatting, data storage, column width and order, cell editing and interactive stuff like context menus. [different designs can be found here](https://github.com/Christian-Me/remote-device-table/tree/master/designs)
 
 ## flow design
 
