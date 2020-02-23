@@ -78,7 +78,7 @@ The flow is divided in three main parts
 
 ## homie convention
 
-![homie logo](./icons/Homie%20logo.svg?sanitize=true)
+![homie logo](./icons/Homie%20logo.svg?sanitize=true | width=100)
 
 To define a common ground for all data this flow uses the [homie convention](https://homieiot.github.io/) which I highly recommend to take a look.
 
