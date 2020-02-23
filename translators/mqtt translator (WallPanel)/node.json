@@ -1,0 +1,21 @@
+[
+    {
+        "id": "f6219bae.e768e8",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "translate mqtt (wallpanel)",
+        "func": "var topicSplitted = msg.topic.split('/');\n\n// IMPORTTANT! \n// Make shure that the topic matches the topic of homie state node that the extra data is merged correctly!\nmsg.topic=\"mqtt://192.168.2.14:1883/\"+topicSplitted[0]+\"/\"+topicSplitted[1];\n\n// -------------------------------------------------------------------\n// this function node can be used as a template for json data via mqtt\n// assumes a topic structure as <base>/<deviceName>/...\n// -------------------------------------------------------------------\n\n// transloator definition (json objects -> state data)\n// leave \"translateTo\" empty if the value should be droped\n// property = proeprty of source\n// translateTo = property of msg.state[translateTo]\n\nvar translator = {\n    \"state\":{\n        \"currentUrl\":{\"translateTo\":\"$localip\"},\n        \"screenOn\":{\"translateTo\":\"screenOn\"},\n        \"brightness\":{\"translateTo\":\"brightness\"}\n    },\n    \"sensor\":{\n        \"battery\":{\n            \"value\":{\"translateTo\":\"battery\"},\n            \"unit\":{\"translateTo\":\"\"},\n            \"charging\":{\"translateTo\":\"charging\"},\n            \"acPlugged\":{\"translateTo\":\"acPlugged\"},\n            \"usbPlugged\":{\"translateTo\":\"usbPlugged\"}\n        },\n        \"motion\":{\n            \"value\":{\"translateTo\":\"motion\"}\n        }\n    }\n}\n\n// --------------------------------------------------\n// other defaults not related to json data\n\nmsg.state={\"$name\":topicSplitted[1]};\nmsg.state.$implementation=\"WallPanel\";\nmsg.state.name=\"Android App\";\nmsg.state.version=\"0.9.1 Build 0\";\nmsg.state.$state=\"ready\";\n\n// --------------------------------------------------\nvar readValues = function(currentTranslator,level) {\n    for (var property in currentTranslator) {\n        if (currentTranslator.hasOwnProperty(property)) {\n            if (level===topicSplitted.length) { // end of branch, we expect data here\n                if (currentTranslator[property].translateTo!==\"\"){\n                    msg.state[currentTranslator[property].translateTo]=msg.payload[property];\n                }\n            } else if (topicSplitted[level]===property) { // step up to next branch\n                readValues(currentTranslator[property],level+1)\n            }\n        }\n    }\n}\nreadValues(translator,2); // start on level 2 -> this is where the data should start\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 484,
+        "y": 374,
+        "wires": [
+            [
+                "f73e708e.f0b8",
+                "466c4805.365698"
+            ]
+        ],
+        "icon": "node-red/swap.svg",
+        "info": "# translator for the wallpanel android app\n## decription\nWallpanel is a fantastic open source android app to show the Node-RED dashboard on any android device in kiosk mode. In addition it comes with mqtt support to read sensor data depending of the capabilities of your device and the ability to receive commnads\nfor more information you find the project here (https://thanksmister.com/wallpanel-android/)\n\n## limitations\n- **wallpanel** do not offer LWT support jet. So detection of $state is verry difficult epecially when your android device is not offering sensor data to detect a timeout. Use the $sate watchdog to emulate LWT\n- **wallpanel** do not offer signal strength readings (WiFi)\n- **no data conversion** Data conversion (i.e. voltage in %). Example can be found in the gerneric translator\n\n## homie features\n- `$name` *string* Name of the device\n- `battery` *integer* Status of the battery in %\n- `$localip` *string* the dashboard the wallpanel is pointing at. *this is not the ip of the android device!*\n\n## extended features\n- `charging` *boolean* indicator if the battery is charging\n- `acPlugged` *boolean* indicator if the device is plugged it ac power (?)\n- `usbPlugged` *boolean* indicator if the device is plugged into usb (?)\n- `screenOn` *boolean* state of the screen (you can use a camera based motion detection, great!)\n- `screenBrightness` *integer* current brightness of the screen\n- `motion` *boolean* state of the motion sensor"
+    }
+]
