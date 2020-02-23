@@ -34,12 +34,12 @@ Node-RED flow to display the status of remote devices on the dashboard using ui-
   - copy/paste documentation in the repro 
   - keep the docs up to date
 - no database necessary
-  - to make the data easy to inspect all data is hold in Node-RED context
-  - keep data as close as possible to the node (context.set instead of flow.set, no global.set)
+  - to make it easy to inspect all data it is hold in Node-RED context
+  - keep data as close as possible to the node *(context.set instead of flow.set, no global.set)*
   - don't rely on data of other nodes as they could be "unplugged" or not available 
   - make use of the basic properties defined by the homie convention
   - as the flow is mostly dealing with live data use non volatile **file** memory only when useful (i.e. table edits or interactive layout modifications)
-  - it is not expected that the flow is not producing a huge amount of data. But many updates will occur.
+  - it is not expected that the flow is producing a huge amount of data. But many updates will occur, so quick access is the key.
 
 ## theory of operation
 
@@ -49,7 +49,7 @@ The flow is divided in three main parts
 
 2. **plugins**: little nodes doing all kind of stuff with this data. For example a watchdog, a reset counter, max. min. or avg. uptime, add icons from the values like battery or signal and other things. To make these reusable it is essential to have a common data-set defined. [different plugins can be found here](https://github.com/Christian-Me/remote-device-table/tree/master/plugins)
 
-3. **table handling and ui design**: universal flow to handle table formatting, data storage, column width and order, cell editing and interactive stuff like context menus. [different designs can be found here](https://github.com/Christian-Me/remote-device-table/tree/master/designs)
+3. **table handling and ui design**: universal flow to handle table formatting, data storage, column width and order, cell editing and interactive stuff like context menus. [different designs can be found here](https://github.com/Christian-Me/remote-device-table/tree/master/table%20designs)
 
 ## flow design
 
@@ -77,6 +77,8 @@ The flow is divided in three main parts
 - context menus are designed separately to enable individual designs
 
 ## homie convention
+
+![homie logo]()
 
 To define a common ground for all data this flow uses the [homie convention](https://homieiot.github.io/) which I highly recommend to take a look.
 
