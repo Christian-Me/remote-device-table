@@ -78,7 +78,7 @@ The flow is divided in three main parts
 
 ## homie convention
 
-![homie logo]()
+![homie logo](https://raw.github.com/Christian-Me/remote-device-table/blob/master/icons/Homie%20logo.svg?sanitize=true)
 
 To define a common ground for all data this flow uses the [homie convention](https://homieiot.github.io/) which I highly recommend to take a look.
 
