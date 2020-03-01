@@ -6,12 +6,13 @@ This function node is a generic translator for data comming in as a msg object. 
 
 The remote device table originates in the [homie convention](https://homieiot.github.io) but can be relatively easyly adapted for other systems. If ever possible the data from other systems should be merged into the homie convention properties to keep the amount of columns in the table low and make it easy to be compared, sorted and filtered. But feel free to add additional proerties as you like. Some properties a essential and should not be changed
 
-** required properties **
+### required properties
+
 - **$topic** essential is a unique index. Unique in this case means unique for ALL remote devices. Otherwise you will get different devices merged into each other. `msg.state.$topic` will be copied into msg.topic to make it easier to access
 - **$name** should be unique and will be inside one mqtt base topic but as every row is identified by $topic it could be edited.
 - **$state** current or last known state of the device | string | ["ready", "lost", "init", "sleeping", "disconnected", "alert"
 
-** special properties **
+### special properties
 
 - **interval** If your device do not provide the inteval ime (on seconds) it could be expected to send updates you should set the fefault to an apropiate time. The `$state watchdog` uses this to set a individual timeout for each device. Set it to 0 when you do not expect regular updates.
  

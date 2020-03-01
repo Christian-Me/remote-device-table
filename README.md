@@ -46,10 +46,16 @@ Node-RED flow to display the status of remote devices on the dashboard using ui-
 The flow is divided in three main parts
 
 1. **data acquisition**: translation of the data into homie and individual user defined fields (not everything fits into the homie convention but it is a good common ground). [different translator nodes can be found here](https://github.com/Christian-Me/remote-device-table/tree/master/translators)
+![callbacks](./screenshots/data_aquisition.png)
 
 2. **plugins**: little nodes doing all kind of stuff with this data. For example a watchdog, a reset counter, max. min. or avg. uptime, add icons from the values like battery or signal and other things. To make these reusable it is essential to have a common data-set defined. [different plugins can be found here](https://github.com/Christian-Me/remote-device-table/tree/master/plugins)
+![callbacks](./screenshots/plugins.png)
 
 3. **table handling and ui design**: universal flow to handle table formatting, data storage, column width and order, cell editing and interactive stuff like context menus. [different designs can be found here](https://github.com/Christian-Me/remote-device-table/tree/master/table%20designs)
+![callbacks](./screenshots/ui-table_handler.png)
+
+4. **callbacks & context menues**: ui-table callbacks are passed from the secont output of the `ui-table handler` to this flow to do display context menus or other do other stuff
+![callbacks](./screenshots/callbacks.png)
 
 ## flow design
 
@@ -78,9 +84,11 @@ The flow is divided in three main parts
 
 ## homie convention
 
-![homie logo](./icons/Homie%20logo.svg?sanitize=true | width=100)
+<img src="./icons/Homie%20logo.svg?sanitize=true" width="100">
 
-To define a common ground for all data this flow uses the [homie convention](https://homieiot.github.io/) which I highly recommend to take a look.
+To define a common ground for all data this flow uses the [homie convention](https://homieiot.github.io/) which I highly recommend to take a closer look.
+
+> For devices using the homie convention there is no translator node necessary and it is recommended to skip the `$state watchdog` plugin
 
 The homie convention defines some statistic and firmware topics. The remote-device-table originates using the $stats and $fw properties The base dataset is defined by the homie convention [3.0.1](https://homieiot.github.io/specification/spec-core-v3_0_1/) and [4.0.0](https://homieiot.github.io/specification/spec-core-v4_0_0/) with [$state](https://github.com/homieiot/convention/blob/develop/extensions/documents/homie_legacy_stats_extension.md) and [$fw](https://github.com/homieiot/convention/blob/develop/extensions/documents/homie_legacy_firmware_extension.md) extensions. 
 If an alternative source provides all or some of the data it should first try to use the existing properties and perform conversions if necessary.
