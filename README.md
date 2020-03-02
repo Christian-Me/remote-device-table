@@ -41,6 +41,28 @@ Node-RED flow to display the status of remote devices on the dashboard using ui-
   - as the flow is mostly dealing with live data use non volatile **file** memory only when useful (i.e. table edits or interactive layout modifications)
   - it is not expected that the flow is producing a huge amount of data. But many updates will occur, so quick access is the key.
 
+## some nice features (most thanks to the tabulator module)
+
+1. table population
+
+   The table is filled and updated dynamically as data arrives. Only new or updated data is sent to the client
+   ![callbacks](./gifs/table-init.gif)
+
+2. table-layout
+
+   The table layout can be modified interactively. Beside changing the column width and order you can hide (and un hide) rows and columns.
+   ![callbacks](./gifs/table-layout.gif)
+
+3. responsive layout
+
+   The table can be viewed with horizontal scroll (with frozen columns) or in a responsive layout
+   ![callbacks](./gifs/responsive-layout.gif)
+
+4. table edit
+
+   The table cells can be edited (where suitable). The edits are stored separately and are prevented from overwrites
+   ![callbacks](./gifs/table-edit.gif)
+
 ## theory of operation
 
 The flow is divided in three main parts
@@ -54,7 +76,7 @@ The flow is divided in three main parts
 3. **table handling and ui design**: universal flow to handle table formatting, data storage, column width and order, cell editing and interactive stuff like context menus. [different designs can be found here](https://github.com/Christian-Me/remote-device-table/tree/master/table%20designs)
 ![callbacks](./screenshots/ui-table_handler.png)
 
-4. **callbacks & context menues**: ui-table callbacks are passed from the secont output of the `ui-table handler` to this flow to do display context menus or other do other stuff
+4. **callbacks & context menus**: ui-table callbacks are passed from the second output of the `ui-table handler` to this flow to do display context menus or other do other stuff
 ![callbacks](./screenshots/callbacks.png)
 
 ## flow design

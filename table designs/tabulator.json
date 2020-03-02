@@ -26,7 +26,7 @@
                 "formatter": "function(cell, formatterParams, onRendered) {      var html = cell.getValue(); return html;  }",
                 "title": "State&nbsp;&nbsp;<i class='fa fa-bolt fa-rotate-90'></i>",
                 "field": "$stateIcon",
-                "width": 100,
+                "width": 40,
                 "align": "center",
                 "frozen": true,
                 "headerVertical": "flip",
@@ -37,7 +37,7 @@
                 "formatter": "function(cell, formatterParams, onRendered) {     var html = cell.getValue(); return html;  }",
                 "title": "Signal&nbsp;&nbsp;<i class='fa fa-signal fa-rotate-90'></i>",
                 "field": "signalIcon",
-                "width": 100,
+                "width": 40,
                 "align": "center",
                 "frozen": true,
                 "headerVertical": "flip",
@@ -47,7 +47,7 @@
             {
                 "title": "Name&nbsp;&nbsp;<i class='fa fa-tag fa-rotate-90'></i>",
                 "field": "$name",
-                "width": 100,
+                "width": 140,
                 "frozen": true,
                 "tooltip": true,
                 "headerVertical": "flip",
@@ -58,7 +58,7 @@
             {
                 "title": "State&nbsp;&nbsp;<i class='fa fa-star-half-o'></i> ",
                 "field": "$state",
-                "width": 100,
+                "width": 65,
                 "align": "center",
                 "headerVertical": "flip",
                 "headerTooltip": "current state: init, ready, lost, sleeping, disconnected or alert",
@@ -67,7 +67,7 @@
             {
                 "title": "last seen&nbsp;&nbsp;<i class='fa fa-clock-o fa-rotate-90'></i>",
                 "field": "lastSeenreadyFormatted",
-                "width": 100,
+                "width": 80,
                 "align": "right",
                 "tooltip": true,
                 "headerVertical": "flip",
@@ -94,10 +94,10 @@
                 "title": "<i class='fa fa-area-chart'></i> Statistics",
                 "columns": [
                     {
-                        "title": "<i class='fa fa-undo'></i>",
+                        "title": "interval&nbsp;&nbsp;<i class='fa fa-undo'></i>",
                         "field": "interval",
-                        "width": 100,
-                        "headerVertical": true,
+                        "width": 40,
+                        "headerVertical": "flip",
                         "headerTooltip": "device update interval",
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     },
@@ -107,11 +107,11 @@
                             "inputFormat": "seconds",
                             "invalidPlaceholder": "(unknown)"
                         },
-                        "title": "<i class='fa fa-clock-o'></i>",
+                        "title": "uptime&nbsp;&nbsp;<i class='fa fa-clock-o'></i>",
                         "field": "uptime",
                         "formatter": "function(cell, formatterParams, onRendered){     var pad = function (num) {         return (\"0\"+num).slice(-2);     };     var secs = Number(cell.getValue());     if (Number.isNaN(secs)) return;     var minutes = Math.floor(secs / 60);     secs = secs%60;     var hours = Math.floor(minutes/60);     minutes = minutes%60;     var days = Math.floor(hours/24);     hours = hours%24;     if (days>0)         return days+\"d \"+pad(hours)+\":\"+pad(minutes);     else         return pad(hours)+\":\"+pad(minutes)+\":\"+pad(secs); }",
-                        "width": 100,
-                        "headerVertical": true,
+                        "width": 75,
+                        "headerVertical": "flip",
                         "headerTooltip": "device uptime",
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     },
@@ -128,11 +128,11 @@
                             "legendColor": "#FFFFFF",
                             "legendAlign": "center"
                         },
-                        "title": "<i class='fa fa-signal'></i>",
+                        "title": "signal&nbsp;&nbsp;<i class='fa fa-wifi'></i>",
                         "field": "signal",
                         "formatter": "progress",
-                        "width": 100,
-                        "headerVertical": true,
+                        "width": 70,
+                        "headerVertical": "flip",
                         "headerTooltip": "device wireless signal quality",
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     },
@@ -149,11 +149,11 @@
                             "legendColor": "#101010",
                             "legendAlign": "center"
                         },
-                        "title": "<i class='fa fa-plug'></i>",
+                        "title": "supply&nbsp;&nbsp;<i class='fa fa-plug'></i>",
                         "field": "supply",
                         "formatter": "progress",
-                        "width": 100,
-                        "headerVertical": true,
+                        "width": 70,
+                        "headerVertical": "flip",
                         "headerTooltip": "device supply voltage",
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     },
@@ -170,11 +170,11 @@
                             "legendColor": "#101010",
                             "legendAlign": "center"
                         },
-                        "title": "<i class='fa fa-battery-2'></i>",
+                        "title": "battery&nbsp;&nbsp;<i class='fa fa-battery-2'></i>",
                         "field": "battery",
                         "formatter": "progress",
-                        "width": 100,
-                        "headerVertical": true,
+                        "width": 70,
+                        "headerVertical": "flip",
                         "headerTooltip": "device battery level in %",
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     },
@@ -191,11 +191,11 @@
                             "legendColor": "#101010",
                             "legendAlign": "right"
                         },
-                        "title": "<i class='fa fa-microchip'></i>",
+                        "title": "memory&nbsp;&nbsp;<i class='fa fa-microchip'></i>",
                         "field": "freeheap",
                         "formatter": "progress",
-                        "width": 100,
-                        "headerVertical": true,
+                        "width": 70,
+                        "headerVertical": "flip",
                         "headerTooltip": "device free heap memory in kb",
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     },
@@ -212,11 +212,11 @@
                             "legendColor": "#101010",
                             "legendAlign": "right"
                         },
-                        "title": "<i class='fa fa-tasks'></i>",
+                        "title": "load&nbsp;&nbsp;<i class='fa fa-tasks'></i>",
                         "field": "cpuload",
                         "formatter": "progress",
-                        "width": 100,
-                        "headerVertical": true,
+                        "width": 70,
+                        "headerVertical": "flip",
                         "headerTooltip": "device cpu load in %",
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     },
@@ -233,11 +233,11 @@
                             "legendColor": "#101010",
                             "legendAlign": "right"
                         },
-                        "title": "<i class='fa fa-thermometer-half'></i>",
+                        "title": "temp&nbsp;&nbsp;<i class='fa fa-thermometer-half'></i>",
                         "field": "cputemp",
                         "formatter": "progress",
-                        "width": 100,
-                        "headerVertical": true,
+                        "width": 70,
+                        "headerVertical": "flip",
                         "headerTooltip": "device cpu temperature in °C",
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     }
@@ -253,41 +253,46 @@
                             "urlPrefix": "http://",
                             "target": "_blank"
                         },
-                        "title": "IP",
+                        "title": "ip&nbsp;&nbsp;<i class='fa fa-globe'></i>",
                         "field": "$localip",
                         "width": 100,
+                        "headerVertical": "flip",
                         "headerTooltip": "device local IP-Address ($localip)",
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     },
                     {
-                        "title": "mac",
+                        "title": "mac&nbsp;&nbsp;<i class='fa fa-barcode'></i>",
                         "field": "$mac",
                         "width": 100,
+                        "headerVertical": "flip",
                         "headerTooltip": "device mac address ($mac)",
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     },
                     {
-                        "title": "Access Point",
+                        "title": "SSID&nbsp;&nbsp;<i class='fa fa-wifi'></i>",
                         "field": "SSID",
                         "width": 100,
+                        "headerVertical": "flip",
                         "headerTooltip": "access point the device device is connected to (provided by http json request)"
                     },
                     {
-                        "title": "Firmware",
+                        "title": "firmware&nbsp;&nbsp;<i class='fa fa-code'></i>",
                         "field": "name",
                         "width": 100,
+                        "headerVertical": "flip",
                         "headerTooltip": "name of the firmware ($fw/name)",
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     },
                     {
-                        "title": "Version",
+                        "title": "version&nbsp;&nbsp;<i class='fa fa-code-fork'></i>",
                         "field": "version",
                         "width": 100,
+                        "headerVertical": "flip",
                         "headerTooltip": "version of the firmware ($fw/version)",
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     },
                     {
-                        "title": "Homie",
+                        "title": "homie&nbsp;&nbsp;<i class='fa fa-rss-square'></i>",
                         "field": "$homie",
                         "width": 100,
                         "align": "left",
@@ -296,7 +301,7 @@
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     },
                     {
-                        "title": "Platform",
+                        "title": "platform&nbsp;&nbsp;<i class='fa fa-microchip'></i>",
                         "field": "$implementation",
                         "width": 100,
                         "align": "left",
@@ -306,29 +311,33 @@
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     },
                     {
-                        "title": "Last Boot Cause",
+                        "title": "boot&nbsp;&nbsp;<i class='fa  fa-exclamation-triangle'></i>",
                         "field": "lastBootCause",
                         "width": 100,
+                        "headerVertical": "flip",
                         "headerTooltip": "last cause of reboot (provided by http json request)"
                     },
                     {
-                        "title": "Reset Reason",
+                        "title": "reset&nbsp;&nbsp;<i class='fa fa-power-off'></i>",
                         "field": "resetReason",
                         "width": 100,
+                        "headerVertical": "flip",
                         "headerTooltip": "last reason of reset (provided by http json request)",
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     },
                     {
-                        "title": "Reset Count",
+                        "title": "reset #&nbsp;&nbsp;<i class='fa fa-sort-numeric-asc'>",
                         "field": "resetTotal",
                         "width": 100,
+                        "headerVertical": "flip",
                         "headerTooltip": "number of resets (provided by resetCounter node)",
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     },
                     {
-                        "title": "avg. uptime",
+                        "title": "a.uptime&nbsp;&nbsp;<i class='fa fa-clock-o'>",
                         "field": "resetAverage",
                         "width": 100,
+                        "headerVertical": "flip",
                         "headerTooltip": "average uptime between resets (provided by resetCounter node)",
                         "formatter": "function(cell, formatterParams, onRendered){     var pad = function (num) {         return (\"0\"+num).slice(-2);     };     var secs = Number(cell.getValue());     if (Number.isNaN(secs)) return;     var minutes = Math.floor(secs / 60);     secs = secs%60;     var hours = Math.floor(minutes/60);     minutes = minutes%60;     var days = Math.floor(hours/24);     hours = hours%24;     if (days>0)         return days+\"d \"+pad(hours)+\":\"+pad(minutes);     else         return pad(hours)+\":\"+pad(minutes)+\":\"+pad(secs); }",
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
@@ -347,9 +356,10 @@
                             "legendAlign": "center"
                         },
                         "formatter": "progress",
-                        "title": "<i class='fa fa-moon-o'></i> sleep ratio",
+                        "title": "sleep %&nbsp;&nbsp;<i class='fa fa-moon-o'></i>",
                         "field": "sleepRatio",
                         "width": 100,
+                        "headerVertical": "flip",
                         "headerTooltip": "ratio between sleep and awake (provided by sleepTimer node)",
                         "headerContext": "function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\"x\":e.x,\"y\":e.y},payload:column._column.field}); e.preventDefault(); }"
                     }
@@ -359,7 +369,7 @@
         "columnResized": "function(column){     var newColumn = {         field: column._column.field,         visible: column._column.visible,         width: column._column.width,         widthFixed: column._column.widthFixed,         widthStyled: column._column.widthStyled     }; this.send({topic:this.config.topic,ui_control:{callback:'columnResized',columnWidths:newColumn}}); }",
         "columnMoved": "function(column, columns){     var newColumns=[];     columns.forEach(function (column) {         newColumns.push({'field': column._column.definition.field, 'title': column._column.definition.title});     });     this.send({topic:this.config.topic,ui_control:{callback:'columnMoved',columns:newColumns}}); }",
         "rowFormatter": "function(row){     var data = row.getData();     switch (data.$state) {         case \"lost\":             row.getElement().style.backgroundColor = \"#9e2e66\";             row.getElement().style.color = \"#a6a6a6\";             break;         case \"sleeping\":             row.getElement().style.backgroundColor = \"#336699\";             break;         case \"disconnected\":             row.getElement().style.backgroundColor = \"#cc3300\";             row.getElement().style.color = \"#a6a6a6\";             break;         case \"alert\":             row.getElement().style.backgroundColor = \"#A6A6DF\";             break;         case \"init\":             row.getElement().style.backgroundColor = \"#f2f20d\";             break;         case \"ready\":             row.getElement().style.backgroundColor = \"\";             row.getElement().style.color = \"\";             break;         } }",
-        "rowContext": "function(e, row){     this.send({ui_control:{callback:'rowContext'},position:{\"x\":e.x,\"y\":e.y},payload:row._row.data.$name,\"$topic\":row._row.data.$topic});     e.preventDefault(); }",
+        "rowContext": "function(e, row){     this.send({ui_control:{callback:'rowContext'},position:{\"x\":e.x,\"y\":e.y},payload:{\"$name\":row._row.data.$name,\"$localip\":row._row.data.$localip,\"name\":row._row.data.name},\"topic\":row._row.data.$topic});     e.preventDefault(); }",
         "cellEdited": "function(cell){     this.send({ui_control:{callback:'cellEdited'},         payload:cell._cell.value,         \"oldValue\":cell._cell.oldValue,         \"field\":cell._cell.column.field,         \"$topic\":cell._cell.row.data.$topic}); }"
     }
 }
