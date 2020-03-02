@@ -1,0 +1,1950 @@
+[
+    {
+        "id": "e0e6e559.8f30d8",
+        "type": "subflow",
+        "name": "scan",
+        "info": "",
+        "category": "ui-table",
+        "in": [
+            {
+                "x": 51,
+                "y": 85,
+                "wires": [
+                    {
+                        "id": "ffa780bb.8fd62"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 357,
+                "y": 85,
+                "wires": [
+                    {
+                        "id": "ffa780bb.8fd62",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [
+            {
+                "name": "ipString",
+                "type": "str",
+                "value": "http://192.168.2.",
+                "ui": {
+                    "icon": "font-awesome/fa-feed",
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "str"
+                        ]
+                    },
+                    "label": {}
+                }
+            },
+            {
+                "name": "start",
+                "type": "num",
+                "value": "1",
+                "ui": {
+                    "icon": "font-awesome/fa-arrow-circle-right",
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "num"
+                        ]
+                    },
+                    "label": {}
+                }
+            },
+            {
+                "name": "end",
+                "type": "num",
+                "value": "255",
+                "ui": {
+                    "icon": "font-awesome/fa-arrow-circle-left",
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "num"
+                        ]
+                    },
+                    "label": {}
+                }
+            },
+            {
+                "name": "suffix",
+                "type": "str",
+                "value": "/json",
+                "ui": {
+                    "icon": "font-awesome/fa-address-card-o",
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "str"
+                        ]
+                    },
+                    "label": {}
+                }
+            }
+        ],
+        "color": "#A6BBCF",
+        "icon": "font-awesome/fa-stethoscope"
+    },
+    {
+        "id": "ffa780bb.8fd62",
+        "type": "function",
+        "z": "e0e6e559.8f30d8",
+        "name": "scan subnet",
+        "func": "var ipString = env.get('ipString') || '';\nvar start = env.get('start') || 1;\nvar end = env.get('end') || 255;\nvar suffix = env.get('suffix') || '/json';\n\nif (!msg.payload.hasOwnProperty(\"command\")) { // if no command scan complete subnet\n    for (let i=start; i<end+1; i++){\n        node.send({\"url\":ipString+i+\"/json\"})\n    }\n} else { // message form popup menue\n    switch (msg.payload.command){\n        case \"updateDevice\":\n            if (msg.payload.hasOwnProperty(\"$localip\") && \n                msg.payload.name===\"ESP Easy Mega\") {\n                    node.status({fill:\"green\", shape:\"dot\", text:\"scan \"+msg.payload.$localip})\n                    return({\"url\":\"http://\"+msg.payload.$localip+\"/json\"});\n            }\n            break;\n        case \"updateDevices\":\n            for (let i=start; i<end+1; i++){\n                node.send({\"url\":ipString+i+\"/json\"})\n            }\n            break;\n    }\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 206,
+        "y": 85,
+        "wires": [
+            []
+        ],
+        "icon": "node-red/white-globe.svg"
+    },
+    {
+        "id": "2924702c.b33a7",
+        "type": "subflow",
+        "name": "ui-table handler",
+        "info": "# ui-table handler\nUniversal handler for ui-table.\n## features\n- buffer table data\n- add or update individual rows or cells of the table\n- delete rows\n- clear tableData\n- handle column width\n- handle column order\n\n## configuration\n- `tabulator` json formatted object containing configuration of the table. See ui-table for more details.\n- `property` property of the msg object that contains the data to be passed to ui-table. I.e. *state* `msg.state`\n- `index` index column to identify individual rows. Each message containing data must have a unique `msg.topic` to identify the row. Messages without this `msg.topic` will be droped. It is not nessesary but possible to display the index column in the table. Do not enable editing on this column otherwise you will loose the connection and another row will be added to the table as soon as a new message arrives!\n\n   Defaults to *$topic* `msg.state.$topic`\n- `dashboard` name of the dashboard tab to only update the table if the dashboard is visible. If empty the table will be updated on every tab change and connect.\n- `context` configuration of context data. The subflow will save or cache data in the flows context using `$parent.`. \n   **tableData** caches the incoming data to restore it on `ui-control´ *change* messages.\n   **tableConfig** saves column width and order to save the interactive table layot\n   **tableEdit** saves edits on the table data otherwise it would be overwritten when new data arrives\n```json\n{\n    \"tableData\": {\n        \"name\": \"tableData\"\n    },\n    \"tableConfig\": {\n        \"name\": \"tableConfig\",\n        \"storage\": \"file\"\n    },\n    \"tableEdit\": {\n        \"name\": \"tableEdit\",\n        \"storage\": \"file\"\n    }\n}\n```\n\n## commands\ncommands can be passed by sending a object as `msg.payload`\n- delete custom colum order and restore colum order from the tabulator json. This is important if you add or delete columns in the tabulator config otherwise the columns most likely don`t show up\n```json\n{\n    \"command\": \"delete\",\n    \"object\": \"columnOrder\"\n}\n```\n- delete custom column widths\n```json\n{\n    \"command\": \"delete\",\n    \"object\": \"columnWidth\"\n}\n```\n- delete tableCache\n```json\n{\n    \"command\": \"delete\",\n    \"object\": \"tableCache\"\n}\n```\n\n## background\nui-table warps the powerfull tabluator library. This subflow makes it easier to unleash the powerfull features of ui-table",
+        "category": "dashboard",
+        "in": [
+            {
+                "x": 54,
+                "y": 85,
+                "wires": [
+                    {
+                        "id": "5eb0bd6b.74b794"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 360,
+                "y": 85,
+                "wires": [
+                    {
+                        "id": "5eb0bd6b.74b794",
+                        "port": 1
+                    }
+                ]
+            },
+            {
+                "x": 360,
+                "y": 136,
+                "wires": [
+                    {
+                        "id": "5eb0bd6b.74b794",
+                        "port": 2
+                    }
+                ]
+            }
+        ],
+        "env": [
+            {
+                "name": "tabulator",
+                "type": "json",
+                "value": "{\"tabulator\":{\"responsiveLayout\":\"collapse\",\"responsiveLayoutCollapseStartOpen\":false,\"index\":\"$name\",\"layout\":\"fitColumns\",\"movableColumns\":true,\"groupBy\":\"\",\"columnResized\":\"function(column){     var newColumn = {         field: column._column.field,         visible: column._column.visible,         width: column._column.width,         widthFixed: column._column.widthFixed,         widthStyled: column._column.widthStyled     }; this.send({topic:this.config.topic,ui_control:{callback:'columnResized',columnWidths:newColumn}}); }\",\"columnMoved\":\"function(column, columns){     var newColumns=[];     columns.forEach(function (column) {         newColumns.push({'field': column._column.definition.field, 'title': column._column.definition.title});     });     this.send({topic:this.config.topic,ui_control:{callback:'columnMoved',columns:newColumns}}); }\",\"rowFormatter\":\"function(row){     var data = row.getData();     switch (data.$state) {         case \\\"lost\\\":             row.getElement().style.backgroundColor = \\\"#9e2e66\\\";             row.getElement().style.color = \\\"#a6a6a6\\\";             break;         case \\\"sleeping\\\":             row.getElement().style.backgroundColor = \\\"#336699\\\";             break;         case \\\"disconnected\\\":             row.getElement().style.backgroundColor = \\\"#cc3300\\\";             row.getElement().style.color = \\\"#a6a6a6\\\";             break;         case \\\"alert\\\":             row.getElement().style.backgroundColor = \\\"#A6A6DF\\\";             break;         case \\\"init\\\":             row.getElement().style.backgroundColor = \\\"#f2f20d\\\";             break;         case \\\"ready\\\":             row.getElement().style.backgroundColor = \\\"\\\";             row.getElement().style.color = \\\"\\\";             break;         } }\",\"columns\":[{\"formatter\":\"responsiveCollapse\",\"width\":30,\"minWidth\":30,\"align\":\"center\",\"resizable\":false,\"headerSort\":false,\"frozen\":true,\"title\":\"expand\",\"field\":\"expand\",\"headerVertical\":\"flip\"},{\"formatter\":\"function(cell, formatterParams, onRendered) {      var html = cell.getValue(); return html;  }\",\"title\":\"State\",\"field\":\"$stateIcon\",\"width\":100,\"frozen\":true,\"headerVertical\":\"flip\"},{\"formatter\":\"function(cell, formatterParams, onRendered) {     var html = cell.getValue(); return html;  }\",\"title\":\"Signal\",\"field\":\"signalIcon\",\"width\":100,\"frozen\":true,\"headerVertical\":\"flip\"},{\"title\":\"Name\",\"field\":\"$name\",\"width\":100,\"frozen\":true,\"headerVertical\":\"flip\"},{\"title\":\"State\",\"field\":\"$state\",\"width\":100,\"align\":\"center\",\"headerVertical\":\"flip\"},{\"title\":\"last-ready\",\"field\":\"lastSeenreadyFormatted\",\"width\":100,\"align\":\"left\",\"headerVertical\":\"flip\"},{\"title\":\"Homie\",\"field\":\"$homie\",\"width\":100,\"align\":\"left\",\"headerVertical\":\"flip\"},{\"title\":\"Platform\",\"field\":\"$implementation\",\"width\":100,\"align\":\"left\",\"headerVertical\":\"flip\"},{\"title\":\"Statistics\",\"columns\":[{\"title\":\"Interval\",\"field\":\"interval\",\"width\":100,\"headerVertical\":\"flip\"},{\"formatterParams\":{\"outputFormat\":\"d hh:mm:ss\",\"inputFormat\":\"seconds\",\"invalidPlaceholder\":\"(unknown)\"},\"title\":\"Uptime\",\"field\":\"uptime\",\"formatter\":\"function(cell, formatterParams, onRendered){     var pad = function (num) {         return (\\\"0\\\"+num).slice(-2);     };     var secs = Number(cell.getValue());     if (Number.isNaN(secs)) return;     var minutes = Math.floor(secs / 60);     secs = secs%60;     var hours = Math.floor(minutes/60);     minutes = minutes%60;     var days = Math.floor(hours/24);     hours = hours%24;     if (days>0)         return days+\\\"d \\\"+pad(hours)+\\\":\\\"+pad(minutes);     else         return pad(hours)+\\\":\\\"+pad(minutes)+\\\":\\\"+pad(secs); }\",\"width\":100,\"headerVertical\":\"flip\"},{\"formatterParams\":{\"min\":0,\"max\":100,\"color\":[\"red\",\"orange\",\"green\"],\"legend\":\"function (value) {if (value>0) return \\\"<span style='color:#FFFFFF;'>\\\"+value+\\\" %</span>\\\"; else return; }\",\"legendColor\":\"#FFFFFF\",\"legendAlign\":\"center\"},\"title\":\"Signal\",\"field\":\"signal\",\"formatter\":\"progress\",\"width\":100,\"headerVertical\":\"flip\"},{\"formatterParams\":{\"min\":2.5,\"max\":3.5,\"color\":[\"red\",\"green\",\"red\"],\"legend\":\"function (value) { if (value>0) return \\\"<span style='color:#FFFFFF;'>\\\"+value+\\\" V</span>\\\"; else return; }\",\"legendColor\":\"#101010\",\"legendAlign\":\"center\"},\"title\":\"Supply\",\"field\":\"supply\",\"formatter\":\"progress\",\"width\":100,\"headerVertical\":\"flip\"},{\"formatterParams\":{\"min\":0,\"max\":100,\"color\":[\"red\",\"orange\",\"green\"],\"legend\":\"function (value) {     if (value>0)         return \\\"<span style='color:#FFFFFF;'>\\\"+value+\\\" %</span>\\\";     else         return; }\",\"legendColor\":\"#101010\",\"legendAlign\":\"center\"},\"title\":\"Battery\",\"field\":\"battery\",\"formatter\":\"progress\",\"width\":100,\"headerVertical\":\"flip\"},{\"formatterParams\":{\"min\":0,\"max\":100000,\"color\":[\"red\",\"orange\",\"green\"],\"legend\":\"function (value) { if (value>0) return \\\"<span style='color:#FFFFFF;'>\\\"+(value/1024).toFixed(2)+\\\" kB</span>\\\"; else return; }\",\"legendColor\":\"#101010\",\"legendAlign\":\"center\"},\"title\":\"Memory\",\"field\":\"freeheap\",\"formatter\":\"progress\",\"width\":100,\"headerVertical\":\"flip\"},{\"formatterParams\":{\"target\":\"_blank\",\"min\":0,\"max\":100,\"color\":[\"red\",\"orange\",\"green\"],\"legend\":\"function (value) {     if (value>0)         return \\\"<span style='color:#FFFFFF;'>\\\"+value+\\\" %</span>\\\";     else         return; }\",\"legendColor\":\"#101010\",\"legendAlign\":\"center\"},\"title\":\"CPU load\",\"field\":\"cpuload\",\"formatter\":\"progress\",\"width\":100,\"headerVertical\":\"flip\"},{\"formatterParams\":{\"min\":20,\"max\":60,\"color\":[\"green\",\"orange\",\"red\"],\"legend\":\"function (value) { if (value>0) return \\\"<span style='color:#FFFFFF;'>\\\"+value+\\\" °C</span>\\\"; else return; }\",\"legendColor\":\"#101010\",\"legendAlign\":\"center\"},\"title\":\"CPU temp\",\"field\":\"cputemp\",\"formatter\":\"progress\",\"width\":100,\"headerVertical\":\"flip\"}]},{\"title\":\"Firmware\",\"columns\":[{\"formatter\":\"link\",\"formatterParams\":{\"labelField\":\"$localip\",\"urlPrefix\":\"http://\",\"target\":\"_blank\"},\"title\":\"IP\",\"field\":\"$localip\",\"width\":100},{\"title\":\"mac\",\"field\":\"$mac\",\"width\":100},{\"title\":\"Accsess Point\",\"field\":\"SSID\",\"width\":100},{\"title\":\"Firmware\",\"field\":\"name\",\"width\":100},{\"title\":\"Version\",\"field\":\"version\",\"width\":100},{\"title\":\"Last Boot Cause\",\"field\":\"lastBootCause\",\"width\":100},{\"title\":\"Reset Reason\",\"field\":\"resetReason\",\"width\":100}]}]},\"customHeight\":12}",
+                "ui": {
+                    "icon": "font-awesome/fa-table",
+                    "label": {
+                        "en-US": "Tabulator"
+                    },
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "json",
+                            "env"
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "tableDataProp",
+                "type": "str",
+                "value": "row",
+                "ui": {
+                    "icon": "font-awesome/fa-tag",
+                    "label": {
+                        "en-US": "rowProperty"
+                    },
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "str",
+                            "num",
+                            "bool",
+                            "json",
+                            "bin",
+                            "env"
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "tableIndex",
+                "type": "str",
+                "value": "$topic",
+                "ui": {
+                    "icon": "font-awesome/fa-indent",
+                    "label": {
+                        "en-US": "Index"
+                    },
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "str",
+                            "json",
+                            "env"
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "dashboard",
+                "type": "str",
+                "value": "Remote Device Table",
+                "ui": {
+                    "icon": "font-awesome/fa-dashboard",
+                    "label": {
+                        "en-US": "Dashboard"
+                    },
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "str",
+                            "env"
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "tableContext",
+                "type": "json",
+                "value": "{\"tableData\":{\"name\":\"tableData\"},\"tableConfig\":{\"name\":\"tableConfig\",\"storage\":\"file\"},\"tableEdit\":{\"name\":\"tableEdit\",\"storage\":\"file\"}}",
+                "ui": {
+                    "icon": "font-awesome/fa-database",
+                    "label": {
+                        "en-US": "Context"
+                    },
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "json",
+                            "env"
+                        ]
+                    }
+                }
+            }
+        ],
+        "color": "#3FADB5",
+        "icon": "node-red-dashboard/ui_slider.png",
+        "status": {
+            "x": 360,
+            "y": 34,
+            "wires": [
+                {
+                    "id": "5eb0bd6b.74b794",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
+        "id": "5eb0bd6b.74b794",
+        "type": "function",
+        "z": "2924702c.b33a7",
+        "name": "handle tableData",
+        "func": "var status = {fill:\"red\",shape:\"dot\",text: \"payload \"};\nvar tableIndex = env.get(\"tableIndex\") || \"$topic\";\nvar tableDataProp = env.get(\"tableDataProp\") || \"row\";\nvar tableContext = env.get(\"tableContext\");\nvar dashboard = env.get(\"dashboard\");\nif (!tableContext.hasOwnProperty(\"tableData\") || !tableContext.hasOwnProperty(\"tableConfig\")) {\n    status.text=\"tableContext not defined\";\n    node.error(status.text);\n    return [{payload:status},null];\n}\n\n// context store to cache table data (memoryOnly prefered)\nvar tableData = flow.get(\"$parent.\"+tableContext.tableData.name,tableContext.tableData.storage);\nif (tableData===undefined) {\n    node.warn(\"[ui-table handler] tableData initialized!\");\n    tableData={};\n    flow.set(\"$parent.\"+tableContext.tableData.name,tableData,tableContext.tableData.storage);\n}\n\n// context Store to save table configuration (file)\nvar tableConfig = flow.get(\"$parent.\"+tableContext.tableConfig.name,tableContext.tableConfig.storage);\nif (tableConfig===undefined) {\n    node.warn(\"[ui-table handler] tableConfig initialized!\");\n    tableConfig={ResponsiveLayout:true};\n    flow.set(\"$parent.\"+tableContext.tableConfig.name,tableConfig,tableContext.tableConfig.storage);\n}\n\n// context Store to save table configuration (file)\nvar tableEdit;\nif (tableContext.hasOwnProperty(\"tableEdit\")) {\n    tableEdit = flow.get(\"$parent.\"+tableContext.tableEdit.name,tableContext.tableEdit.storage);\n    if (tableEdit===undefined) {\n        node.warn(\"[ui-table handler] tableEdit initialized!\");\n        tableEdit={};\n        flow.set(\"$parent.\"+tableContext.tableEdit.name,tableEdit,tableContext.tableEdit.storage);\n    }\n}\n\n// function to merge partial data into existing table row\nvar mergeObject = function (destination, source, filter) {\n    for (let currentSource in source) {\n        if (source.hasOwnProperty(currentSource)) {\n            if (filter!==undefined && tableEdit && tableEdit.hasOwnProperty(filter) && tableEdit[filter].hasOwnProperty(currentSource)) {\n                destination[currentSource]= tableEdit[filter][currentSource];\n                source[currentSource]=tableEdit[filter][currentSource];\n            } else {\n                destination[currentSource]= source[currentSource];\n            }\n        }    \n    }\n    return source;\n};\n    \n// deep search for a column\nvar searchTabulatorColumn = function (columns,key,match) {\n    var result;\n    for (let column of columns) {\n        if (column.hasOwnProperty(\"columns\")) {\n            result = searchTabulatorColumn(column.columns,key,match);\n            if (result!==undefined) return result;\n        } else if (column.hasOwnProperty(key) && column[key]===match) {\n            return column;\n        }\n    }\n};\n\n// command message to update add or update data on ui-table\nvar msgToTable={};\nmsgToTable.payload={\n    \"command\":\"updateOrAddData\",\n    \"arguments\": [],\n    \"returnPromise\": false\n};\n\nif (msg.hasOwnProperty(tableDataProp)) {\n    // store data for later recover\n    if (!msg.hasOwnProperty(\"topic\")) { // check if index existst\n        status.text=\"msg.topic not defined!\";\n        return [{payload:status},null];\n    }\n    if (!tableData.hasOwnProperty(msg.topic)){ // first seen\n        tableData[msg.topic]={};\n        if (tableEdit && tableEdit.hasOwnProperty(msg.topic)) { // table edits available!\n            Object.keys(tableEdit[msg.topic]).forEach((key) => {\n                msg[tableDataProp][key]=tableEdit[msg.topic][key];\n                tableData[msg.topic][key]=tableEdit[msg.topic][key];\n            })\n        }\n    }\n    if (!tableData[msg.topic].hasOwnProperty(tableIndex)) tableData[msg.topic][tableIndex]=msg.topic;\n    msg[tableDataProp]=mergeObject(tableData[msg.topic],msg[tableDataProp],msg.topic);\n    msg[tableDataProp][tableIndex]=msg.topic;\n    msgToTable.payload.arguments=[[msg[tableDataProp]]];\n    status.fill=\"green\";\n    status.text=msg.topic+\" updated\";\n    return [{payload:status},msgToTable,null];\n} if (msg.payload===\"connect\" || (msg.payload===\"change\" && msg.name===dashboard) || (msg.hasOwnProperty(\"payload\") && msg.payload.hasOwnProperty(\"command\"))) { \n    if (!msg.hasOwnProperty(\"ui_control\")) {\n        msg.ui_control = env.get('tabulator');\n        status.text+=\" ui_control added\";\n    }\n    //process commands\n    //node.warn({\"command\":msg.payload.command,\"msg\":msg,\"object\":msg.payload.object})\n    if (msg.payload.hasOwnProperty(\"command\")) {\n        status.fill=\"blue\";\n        switch(msg.payload.command) {\n            case 'deleteTable':\n                flow.set(\"$parent.\"+tableContext.tableData.name,undefined,tableContext.tableData.storage);\n                tableData={};\n                status.text=\"tabledata deleted\";\n                node.warn(\"[ui-table handler] \"+\"tabledata deleted\");\n                break;\n            case 'deleteDevice':\n                if (tableData.hasOwnProperty(msg.payload.object)) {\n                    delete tableData[msg.payload.object];\n                    status.text=msg.payload.object+\" deleted\";\n                } else {\n                    status.fill=\"yellow\";\n                    status.text=msg.payload.object+\" undefined\";\n                }\n                break;\n            case 'ignoreDevice':\n                if (tableData.hasOwnProperty(msg.payload.object)) {\n                    delete tableData[msg.payload.object];\n                    status.text=msg.payload.object+\" will be ignored\";\n                    if (!tableConfig.hasOwnProperty('ignoreDevice')) tableConfig.ignoreDevice={};\n                    tableConfig.ignoreDevice[msg.payload.object]=true;\n                }\n                break;\n            case 'unIgnoreDevice':\n                if (tableConfig.hasOwnProperty('ignoreDevice')) {\n                    delete tableConfig.ignoreDevice[msg.payload.object];\n                }\n                break;\n            case 'unIgnoreDevices':\n                delete tableConfig.ignoreDevice;\n                break;\n            case 'updateData':\n                status.text=\"column \"+msg.payload.column+\" updated\";\n                return [{payload:status},msg];\n            case 'updateTable':\n                status.text=msg.payload.command+\": \";\n                break;\n            case 'columnHide':\n                if (!tableConfig.hasOwnProperty('columnVisible')) tableConfig.columnVisible={};\n                tableConfig.columnVisible[msg.payload.object]=false;\n                break;\n            case 'columnUnHide':\n                if (!tableConfig.hasOwnProperty('columnVisible')) tableConfig.columnVisible={};\n                tableConfig.columnVisible[msg.payload.object]=true;\n                break;\n            case 'columnsUnHide':\n                for (let column in tableConfig.columnVisible) {\n                    if (tableConfig.columnVisible.hasOwnProperty(column)) tableConfig.columnVisible[column]=true;\n                }\n                break;\n            case 'refreshTable':\n                break;\n            case 'restoreColumnOrder':\n                delete tableConfig.columns;\n                break;\n            case 'resetColumnWidth':\n                delete tableConfig.columnWidths;\n                break;\n            case 'setResponsiveLayout':\n                tableConfig.ResponsiveLayout=!tableConfig.ResponsiveLayout;\n                break;\n            default:\n                status.fill=\"red\";\n                status.text=\"unknown command \"+msg.payload.command;\n                node.warn(\"[ui-table handler] \"+status.text);\n                break;\n        }\n        flow.set(\"$parent.\"+tableContext.tableConfig.name,tableConfig,tableContext.tableConfig.storage);\n        node.send([{payload:status},null,null]);\n    }\n\n    // crawl through tabulator arrays and updated user defined values\n    var crawlTabulator = function (columns,match,config,property) {\n        for (let column of columns) {\n            if (column.hasOwnProperty(\"columns\")) {\n                crawlTabulator(column.columns,match,config,property);\n            } else if (config.hasOwnProperty(column[match])) column[property]=config[column.field];\n        }\n    };\n    \n    // restore custom column width\n    if (tableConfig.hasOwnProperty(\"columnWidths\") && msg.hasOwnProperty(\"ui_control\")) {\n        crawlTabulator(msg.ui_control.tabulator.columns,\"field\",tableConfig.columnWidths,\"width\");\n    }\n    \n    // restore custom column hide/show\n    if (tableConfig.hasOwnProperty(\"columnVisible\") && msg.hasOwnProperty(\"ui_control\")) {\n        crawlTabulator(msg.ui_control.tabulator.columns,\"field\",tableConfig.columnVisible,\"visible\");\n    }\n    \n    // restore custom responsive / standard view\n    if (tableConfig.hasOwnProperty(\"ResponsiveLayout\")) {\n        if (!tableConfig.ResponsiveLayout) {\n            msg.ui_control.tabulator.responsiveLayout=false;\n        }\n        msg.ui_control.tabulator.columns.forEach((column,index) => {\n            if (column.formatter===\"responsiveCollapse\") { // hide expand column on any position\n                column.visible=tableConfig.ResponsiveLayout;\n                return;\n            }\n        });\n    }\n\n    // sort columns\n    if (tableConfig.hasOwnProperty(\"columns\") && msg.hasOwnProperty(\"ui_control\") && msg.ui_control.hasOwnProperty(\"tabulator\")) {\n        var addedColumns = 0;\n        var sortColumnsByLayout = function (sortColumns, columnsLayout, targetColumns) {\n            for (var layoutColumn=0;  layoutColumn<columnsLayout.length; layoutColumn++) {\n                for (var sortColumn in sortColumns) {\n                    if (sortColumns[sortColumn].hasOwnProperty(\"columns\")) {\n                        targetColumns.push({\"title\":sortColumns[sortColumn].title, \"columns\":[]});\n                        sortColumnsByLayout(sortColumns[sortColumn].columns,columnsLayout,targetColumns[targetColumns.length-1].columns);\n                        layoutColumn=addedColumns; // jump forward after childes added\n                    } else {\n                        if (columnsLayout[layoutColumn].field===sortColumns[sortColumn].field){\n                            targetColumns.push(sortColumns[sortColumn]);\n                            addedColumns++;\n                            break;\n                        }\n                    }\n                }\n            }\n        };                 \n        var newColumns=[];\n        sortColumnsByLayout(msg.ui_control.tabulator.columns,tableConfig.columns,newColumns);\n        msg.ui_control.tabulator.columns=newColumns;\n    }\n\n    // restore stored lines after connect\n    msg.payload=[];\n    for (let device in tableData) {\n        if (tableConfig && tableConfig.hasOwnProperty(\"ignoreDevice\") && tableConfig.ignoreDevice[device]) {\n            continue;\n        }\n        // merge edits into table\n        if (tableEdit && tableEdit.hasOwnProperty(device)) {\n            let tableRow = RED.util.cloneMessage(tableData[device]);\n            Object.keys(tableEdit[device]).forEach((field) => {\n                tableRow[field]=tableEdit[device][field];\n            });\n            msg.payload.push(tableRow);\n        } else {\n            msg.payload.push(tableData[device]);\n        }\n    }\n    \n    status.fill=\"blue\";\n    status.text+=\" \"+msg.payload.length+\" rows restored\";\n    return [{payload:status},msg];\n} if (msg.hasOwnProperty(\"ui_control\")) {\n    // callback from tabulator\n    status.fill=\"blue\";\n    status.text=\"unknown callback \"+msg.ui_control.callback;\n    switch(msg.ui_control.callback) {\n        case \"columnResized\": // save new column width\n            if (tableConfig.columnWidths===undefined) tableConfig.columnWidths={};\n            tableConfig.columnWidths[msg.ui_control.columnWidths.field]=msg.ui_control.columnWidths.width;\n            flow.set(\"$parent.\"+tableContext.tableConfig.name,tableConfig,tableContext.tableConfig.storage);\n            status.text=msg.ui_control.columnWidths.field+\"=\"+msg.ui_control.columnWidths.width+\"px\";\n            break;\n        case \"columnMoved\": // save new column order\n            if (tableConfig.columns===undefined) tableConfig.columns=[];\n            tableConfig.columns=msg.ui_control.columns;\n            flow.set(\"$parent.\"+tableContext.tableConfig.name,tableConfig,tableContext.tableConfig.storage);\n            status.text=\"new column order\";\n            break;\n        case \"cellEdited\":\n            if (tableEdit) {\n                if (!tableEdit.hasOwnProperty(msg[tableIndex])) tableEdit[msg[tableIndex]]={};\n                tableEdit[msg[tableIndex]][msg.field] = msg.payload; // save data and mark es edited field\n                flow.set(\"$parent.\"+tableContext.tableEdit.name,tableEdit,tableContext.tableEdit.storage);\n                status.text=msg[tableIndex]+\" \"+msg.field+\" edited to \"+msg.payload;\n                msg[tableDataProp]={};\n                msg[tableDataProp][tableIndex]=msg[tableIndex];\n                msg[tableDataProp][msg.field]=msg.payload;\n                msgToTable.payload.arguments=[[msg[tableDataProp]]];\n                node.send([{payload:status},msgToTable,msg]);\n            } else {\n                node.error(\"[ui-table handler] no tableEdit store defined!\")\n            }\n            break;\n        case \"rowContext\":\n            msg.ignoredDevices=[];\n            for (let device in tableConfig.ignoreDevice) {\n                if (tableConfig.ignoreDevice.hasOwnProperty(device)) {\n                    msg.ignoredDevices.push({\"text\":device,\"icon\":\"fa fa-plug\",\"topic\":\"unIgnoreDevice\",\"payload\":device})  \n                }\n            }\n            break;\n        case \"headerContext\":\n            msg.hiddenColumns=[];\n            let tabulatorConfig = env.get('tabulator');\n            for (let column in tableConfig.columnVisible) {\n                if (tableConfig.columnVisible.hasOwnProperty(column) &&\n                    !tableConfig.columnVisible[column]) {\n                    let configColumn=searchTabulatorColumn(tabulatorConfig.tabulator.columns,\"field\",column);\n                    let icon;\n                    if (configColumn.hasOwnProperty('title') && configColumn.title.toLowerCase().includes('</i>')) {\n                        // <i class='fa fa-star-half-o'></i> State\n                        let start=configColumn.title.indexOf(\"'fa \");\n                        let end=configColumn.title.indexOf(\"'\",start+1);\n                        icon=configColumn.title.substring(start+4,end);\n                    }\n                    msg.hiddenColumns.push({\"text\":column,\"icon\":icon,\"topic\":\"columnUnHide\",\"payload\":configColumn.field})  \n                }\n            }\n            break;\n        default:\n            // if rowIndex exists pass complete object\n            if (msg.hasOwnProperty(tableIndex)) {\n                msg.rowData=tableData[msg[tableIndex]];\n            }\n            status.text=\"pass message\";\n    }\n    return [{payload:status},null,msg];\n}\n// nothing to do bejond this point\nstatus.text+=\" [\"+msg.payload+\"]\";\nreturn [{payload:status},null];\n",
+        "outputs": 3,
+        "noerr": 0,
+        "x": 192,
+        "y": 85,
+        "wires": [
+            [],
+            [],
+            []
+        ],
+        "icon": "font-awesome/fa-table"
+    },
+    {
+        "id": "9d52d40a.a63668",
+        "type": "tab",
+        "label": "remoteDeviceTable",
+        "disabled": false,
+        "info": "# remote-device-table\nNode-RED flow to display the status of remote devices on the dashboard using ui-table\n\n**first beta version**\n\n![screenshot](https://github.com/Christian-Me/remote-device-table/blob/master/screenshots/teaser.png?raw=true)\n## introduction\n>In IOT or home automation environments there are normally many remote devices connected to Node-RED sometimes over wireless connections. This flow gives a dynamic overview of all devices with their last status messages and system health information.\n\n## goals\n- expandable\n  - all kinds of data sources can be added using *translators*\n  - data can be processed through *plugins*\n  - table layout and functions can be configured\n- easy to modify\n  - no custom nodes which makes it difficult for normal users to do modifications\n  - standard nodes wherever possible and useful\n- reusable\n  - function nodes should be reusable and easy to read\n  - configuration through json objects instead if/switch statements\n  - subflows with environment variables when a function node is more \"complex\"\n- dynamic dashboard table\n  - make use of the functionality of ui-table and the tabulator js module behind\n  - only send updated data to keep traffic low\n  - let ui-table do the display formatting so the flow only holds generic data and the screen display can be individually configured\n- **contributions are highly appreciated**\n  - new **translation nodes** for different devices or protocols\n  - new or updated data **processing plugins** nodes\n  - new or updated **table designs**\n  - many parts of the flow contains only a draft layout and basic functions suggestions or PRs are always welcome.\n- **documentation**\n  - documentation in the nodes description tab so it is always available\n  - documentation in source comments if useful\n  - copy/paste documentation in the repro \n  - keep the docs up to date\n- no database necessary\n  - to make it easy to inspect all data it is hold in Node-RED context\n  - keep data as close as possible to the node *(context.set instead of flow.set, no global.set)*\n  - don't rely on data of other nodes as they could be \"unplugged\" or not available \n  - make use of the basic properties defined by the homie convention\n  - as the flow is mostly dealing with live data use non volatile **file** memory only when useful (i.e. table edits or interactive layout modifications)\n  - it is not expected that the flow is producing a huge amount of data. But many updates will occur, so quick access is the key.\n\n## some nice features (most thanks to the tabulator module)\n\n1. table population\n\n   The table is filled and updated dynamically as data arrives. Only new or updated data is sent to the client\n   ![callbacks](https://raw.githubusercontent.com/Christian-Me/remote-device-table/master/gifs/table-init.gif)\n\n2. table-layout\n\n   The table layout can be modified interactively. Beside changing the column width and order you can hide (and un hide) rows and columns.\n   ![callbacks](https://raw.githubusercontent.com/Christian-Me/remote-device-table/master/gifs/table-layout.gif)\n\n3. responsive layout\n\n   The table can be viewed with horizontal scroll (with frozen columns) or in a responsive layout\n   ![callbacks](https://raw.githubusercontent.com/Christian-Me/remote-device-table/master/gifs/responsive-layout.gif)\n\n4. table edit\n\n   The table cells can be edited (where suitable). The edits are stored separately and are prevented from overwrites\n   ![callbacks](https://raw.githubusercontent.com/Christian-Me/remote-device-table/master/gifs/table-edit.gif)\n\n## theory of operation\n\nThe flow is divided in three main parts\n\n1. **data acquisition**: translation of the data into homie and individual user defined fields (not everything fits into the homie convention but it is a good common ground). [different translator nodes can be found here](https://github.com/Christian-Me/remote-device-table/tree/master/translators)\n![callbacks](https://raw.githubusercontent.com/Christian-Me/remote-device-table/master/screenshots/data_aquisition.png)\n\n2. **plugins**: little nodes doing all kind of stuff with this data. For example a watchdog, a reset counter, max. min. or avg. uptime, add icons from the values like battery or signal and other things. To make these reusable it is essential to have a common data-set defined. [different plugins can be found here](https://github.com/Christian-Me/remote-device-table/tree/master/plugins)\n![callbacks](https://raw.githubusercontent.com/Christian-Me/remote-device-table/master/screenshots/plugins.png)\n\n3. **table handling and ui design**: universal flow to handle table formatting, data storage, column width and order, cell editing and interactive stuff like context menus. [different designs can be found here](https://github.com/Christian-Me/remote-device-table/tree/master/table%20designs)\n![callbacks](https://raw.githubusercontent.com/Christian-Me/remote-device-table/master/screenshots/ui-table_handler.png)\n\n4. **callbacks & context menus**: ui-table callbacks are passed from the second output of the `ui-table handler` to this flow to do display context menus or other do other stuff\n![callbacks](https://raw.githubusercontent.com/Christian-Me/remote-device-table/master/screenshots/callbacks.png)\n\n## flow design\n\n- The flow starts with a msg coming in from mqtt / http or other sources in various shape or forms\n- A translator node will process the data:\n  - add a unique identifier to the message in msg.topic\n  - add properties to the msg.state object \n    - using the predefined homie convention properties\n    - adding new properties\n    - filtering out not necessary or constant data\n    - process data (i.e. signal strength form dB to %)\n- the data then will be passed into the plugin sections through in/out nodes\n- Data processing is like a stack of functions\n  - there could be different entries to the stack. (i.e. mqtt devices can make use of the LWT functionality of the broker so they do not need the watchdog node)\n  - adding new fields like icons\n  - do other stuff with the data\n- the final result will then be passed to the UI part of the flow\n- the `ui-table handler` should do the heavy lifting \n  - send the data to the table\n  - keep a copy of all data for tab changes or new clients connecting\n  - store interactive layout changes\n  - store interactive edits in the table\n  - handle commands to alter the stored data or perform other things\n  - handle context menus or callbacks form ui-table\n- context menus are designed separately to enable individual designs\n\n## homie convention\n\n<img src=\"./icons/Homie%20logo.svg?sanitize=true\" width=\"100\">\n\nTo define a common ground for all data this flow uses the [homie convention](https://homieiot.github.io/) which I highly recommend to take a closer look.\n\n> For devices using the homie convention there is no translator node necessary and it is recommended to skip the `$state watchdog` plugin\n\nThe homie convention defines some statistic and firmware topics. The remote-device-table originates using the $stats and $fw properties The base dataset is defined by the homie convention [3.0.1](https://homieiot.github.io/specification/spec-core-v3_0_1/) and [4.0.0](https://homieiot.github.io/specification/spec-core-v4_0_0/) with [$state](https://github.com/homieiot/convention/blob/develop/extensions/documents/homie_legacy_stats_extension.md) and [$fw](https://github.com/homieiot/convention/blob/develop/extensions/documents/homie_legacy_firmware_extension.md) extensions. \nIf an alternative source provides all or some of the data it should first try to use the existing properties and perform conversions if necessary.\n\n## reserved properties\nproperty | description | type    | format \n-------- | ----------- | ------- | ------ \n$homie | The implemented Homie convention version | string | \"4.0.0\"\n$name | the **unique** name of the device. This name is used to identify the device in the table. | string | \"myDevice\"\n$state | current or last state of the device | string | [\"ready\", \"lost\", \"init\", \"sleeping\", \"disconnected\", \"alert\"]\n$nodes\t| Nodes the device exposes | array | comma seperated list\n$extensions\t| Supported extensions | array | comma seperated list\n$implementation | An identifier for the Homie implementation | string | \"esp8266\"\n\n\n\ndefined by [**Legacy Firmware**](https://github.com/homieiot/convention/blob/develop/extensions/documents/homie_legacy_firmware_extension.md)\n\nproperty | description | type    | format\n-------- | ----------- | ------- | ------\n$localip | IP of the device on the local network | string | \"127.0.0.1\"\n$mac | Mac address of the device network interface | string | The format MUST be of the type `A1:B2:C3:D4:E5:F6`\nname | Name of the firmware running on the device. | string | Allowed characters are the same as the device ID\nversion | Version of the firmware running on the device. | string | \"1.0.0\"\n\n\ndefined by [**Legacy Stats**](https://github.com/homieiot/convention/blob/develop/extensions/documents/homie_legacy_stats_extension.md)\n\nproperty | description | type    | format\n-------- | ----------- | ------- | ------\ninterval | Interval in seconds at which the device refreshes its `$stats/+` | integer | Positive greater 0\nuptime | Time elapsed in seconds since the boot of the device | integer | seconds\nsignal | Signal strength | Integer | in %\ncputemp | CPU Temperature | Float | in °C\ncpuload | CPU Load in. Average of last $stats\\interval including all CPUs | Integer | %. \nbattery | Battery level. | Integer | in %\nfreeheap | Free heap. |\tPositive Integer | in bytes\nsupply | Supply Voltage | Float | in V\n\n\n"
+    },
+    {
+        "id": "378305fa.cef78a",
+        "type": "homie-convention-state",
+        "z": "9d52d40a.a63668",
+        "broker": "3840d6b5.4291da",
+        "name": "mosquitto@home",
+        "stateDeviceID": "[any]",
+        "infoFw": true,
+        "infoStats": true,
+        "infoTiming": false,
+        "infoError": false,
+        "x": 209,
+        "y": 68,
+        "wires": [
+            [
+                "677977e5.f274b8",
+                "52619ce0.5df084"
+            ]
+        ]
+    },
+    {
+        "id": "90e3c8cd.8287a8",
+        "type": "ui_table",
+        "z": "9d52d40a.a63668",
+        "group": "3e8e6acd.3587c6",
+        "name": "",
+        "order": 7,
+        "width": "19",
+        "height": "10",
+        "columns": [],
+        "outputs": 1,
+        "cts": true,
+        "x": 611,
+        "y": 1207,
+        "wires": [
+            [
+                "b8393c0b.3d7ec"
+            ]
+        ]
+    },
+    {
+        "id": "9baf06cf.ca3ff8",
+        "type": "ui_ui_control",
+        "z": "9d52d40a.a63668",
+        "name": "",
+        "events": "all",
+        "x": 179,
+        "y": 1258,
+        "wires": [
+            [
+                "7adad4ad.104b3c"
+            ]
+        ]
+    },
+    {
+        "id": "db94aa7b.554e88",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "add icons",
+        "func": "var icons= {\n    \"$state\":[\n        {\"value\":\"init\",\"icon\":\"fa fa-cog fa-spin\"},\n        {\"value\":\"ready\",\"icon\":\"fa fa-spinner fa-spin\"},\n        {\"value\":\"disconnected\",\"icon\":\"fa fa-times\"},\n        {\"value\":\"sleeping\",\"icon\":\"fa fa-moon-o\"},\n        {\"value\":\"lost\",\"icon\":\"fa fa-question-circle\"},\n        {\"value\":\"lostBroker\",\"icon\":\"fa fa-exclamation-triangle\"},\n        {\"value\":\"alert\",\"icon\":\"fa fa-exclamation-triangle\"}\n    ],\n    \"signal\":[\n        {\"value\":10,\"icon\":\"perm_scan_wifi\",\"style\":\"color:#cc0000\"},\n        {\"value\":20,\"icon\":\"wifi\",\"style\":\"color:#cc3300\"},\n        {\"value\":30,\"icon\":\"wifi\",\"style\":\"color:#cc6600\"},\n        {\"value\":40,\"icon\":\"wifi\",\"style\":\"color:#cc9900\"},\n        {\"value\":50,\"icon\":\"wifi\",\"style\":\"color:#cccc00\"},\n        {\"value\":60,\"icon\":\"wifi\",\"style\":\"color:#99cc00\"},\n        {\"value\":70,\"icon\":\"wifi\",\"style\":\"color:#66cc00\"},\n        {\"value\":80,\"icon\":\"wifi\",\"style\":\"color:#33cc00\"},\n        {\"value\":100,\"icon\":\"signal_wifi_4_bar\",\"style\":\"color:#00cc00\"},\n    ],\n    \"battery\":[\n        {\"value\":10,\"icon\":\"battery-alert\",\"style\":\"color:#cc0000\"},\n        {\"value\":20,\"icon\":\"battery_20\"},\n        {\"value\":30,\"icon\":\"battery_30\"},\n        {\"value\":50,\"icon\":\"battery_50\"},\n        {\"value\":60,\"icon\":\"battery_60\"},\n        {\"value\":70,\"icon\":\"battery_70\"},\n        {\"value\":80,\"icon\":\"battery_80\"},\n        {\"value\":90,\"icon\":\"battery_90\"},\n        {\"value\":100,\"icon\":\"battery_full\",\"style\":\"color:#00cc00\"},\n    ]\n};\n\nvar status = {fill:\"yellow\",shape:\"dot\",text: \"no msg.state\"};\nif (msg.hasOwnProperty(\"state\")) {\n    status.text=\"device=\";\n    status.text+=(msg.state.$name) ? msg.state.$name : msg.topic;\n    var formatHtml=function(icon) {\n        var html=\"\"\n        if (icon.icon.startsWith('fa')) {\n            html = \"<i class=\\\"\"+icon.icon+'\\\"></i>'; \n        } else {\n            html+='<i class=\"material-icons\"';\n            if (icon.hasOwnProperty(\"style\")) html+=' style=\"'+icon.style+'\"';\n            html+='>'+icon.icon+'</i>';                               \n        }\n        return html;\n    }\n    nextProperty: \n    for (var state in msg.state) {\n        if (icons.hasOwnProperty(state)) {\n            for (var icon of icons[state]) {\n                switch (typeof msg.state[state]) {\n                    case \"string\":\n                        if (msg.state[state]===icon.value) {\n                            msg.state[state+\"Icon\"]=formatHtml(icon);\n                            status.fill=\"green\";\n                            status.text+=state+\" \";\n                            continue nextProperty;\n                        }\n                        break;    \n                    case \"number\":\n                        if (msg.state[state]<=icon.value) {\n                            msg.state[state+\"Icon\"]=formatHtml(icon);\n                            status.fill=\"green\";\n                            status.text+=state+\" \";\n                            continue nextProperty;\n                        }\n                        break;\n                }\n            }\n        }\n    }    \n}\nnode.status(status);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 366,
+        "y": 918,
+        "wires": [
+            [
+                "248e0178.34da0e"
+            ]
+        ],
+        "icon": "font-awesome/fa-wifi",
+        "info": "# Add and format icons\n- This node is configured by a json object. \n- All incomming data inside `msg.state`is inspected to the parent keys of this object. \n- The value contains an array of objects defining differend icons and styles to be added.\n- a html formatted string is added to `msg.state.[key+\"Icon\"]`\n- the current version supports font awesome icons supported by the dshboard and material icons including the style and size [ToDo] property\n- Sting values will be compared for a case sensitive match\n- values will be compared `<=`. So arrange the objects in a increasing order.\n\n## configuration object\n- defining the keys to be triggered\n```json\n{\n    \"$state\":[],\n    \"signal\":[],\n    \"battery\":[]\n}\n```\n- to trigger on a the value \"init\" to get a font awsome icon plce ´fa´ at the beginning of the `icon` value\n```json\n{\n    \"value\":\"init\",\n    \"icon\":\"fa fa-cog fa-spin\"\n}\n```\nfor material icons you can use\n```json\n{\n    \"value\":10,\n    \"icon\":\"perm_scan_wifi\",\n    \"style\":\"color:#cc0000\"\n}\n```\n"
+    },
+    {
+        "id": "ab516c03.7241c",
+        "type": "homie-convention-device",
+        "z": "9d52d40a.a63668",
+        "broker": "3840d6b5.4291da",
+        "name": "",
+        "deviceID": "[any]",
+        "nodeID": "System_Info",
+        "propertyID": "[any]",
+        "topic": "[any]/System_Info/[any]",
+        "infoAttributes": true,
+        "infoTiming": true,
+        "infoError": true,
+        "addLabel": "none",
+        "labelTopic": false,
+        "labelPayload": true,
+        "labelName": "",
+        "uiPlaceName": "",
+        "uiNode": "none",
+        "uiControlDropdown": true,
+        "uiControlMinMax": true,
+        "uiColor1": "#ffffff",
+        "uiBgColor1": "#ffffff",
+        "uiColorON": "#ffffff",
+        "uiColorOFF": "#ffffff",
+        "uiColorPredicted": "#ffffff",
+        "uiUseColorPredicted": false,
+        "uiColorPredictedOff": "#ffffff",
+        "uiUseColorPredictedOff": false,
+        "uiFormat": false,
+        "uiTooltip": "",
+        "uiIcon1": "",
+        "uiIconON": "",
+        "uiIconOFF": "",
+        "uiSwitchPredicted": false,
+        "uiSwitchColorPredictedON": "#aaaaaa",
+        "uiSwitchColorPredictedOFF": "#aaaaaa",
+        "uiSwitchIconPredictedON": "fa-toggle-on",
+        "uiSwitchIconPredictedOFF": "fa-toggle-off",
+        "uiFormatColor": "homieString",
+        "settable": false,
+        "x": 212,
+        "y": 204,
+        "wires": [
+            [
+                "a89f27b1.0d13d8"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "a89f27b1.0d13d8",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "translate homie",
+        "func": "\n// IMPORTTANT! \n// Make shure that the topic matches the topit of homie state node that the extra data is merged correctly!\nmsg.topic=\"mqtt://192.168.2.14:1883/homie/\"+msg.deviceId;\n// if you do not use the homie convention choose a unique indetifier as msg.topic:\n// msg.topic=msg.payload.System[\"Unit Name\"];\n\nmsg.state={\"$name\":msg.deviceId,\"$state\":\"ready\"};\nswitch (msg.propertyId.toLowerCase()) {\n    // messages that need conversion\n    case ('rssi'):\n        msg.state.signal=Math.min(Math.max(2 * (msg.value + 100), 0), 100)\n        break;\n    // all messages that can be translated 1:1    \n    case ('freeheap'):\n    case ('uptime'):\n        msg.state[msg.propertyId]=msg.value;\n        break;\n    default: // drop message\n        return;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 437,
+        "y": 187,
+        "wires": [
+            [
+                "9e278daa.10534",
+                "f6956de0.9b59d"
+            ]
+        ],
+        "icon": "node-red/swap.svg"
+    },
+    {
+        "id": "9d9d213d.09396",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "lastSeen",
+        "func": "if (msg.hasOwnProperty(\"payload\") && msg.payload.hasOwnProperty(\"command\")) {\n    switch (msg.payload.command) {\n        case \"deleteTable\":\n            context.set(\"lastSeen\",undefined);\n            context.set(\"lastState\",undefined);\n            node.status({fill:\"yellow\",shape:\"dot\",text:\"lastSeen&lastState deleted\"});\n            node.warn(\"[lastSeen] lastSeen&lastState deleted\");\n            return msg;\n    }\n}\n\nif (msg.hasOwnProperty(\"topic\") && (msg.hasOwnProperty(\"state\") || msg.payload.hasOwnProperty(\"command\"))) {\n    var lastSeen = context.get(\"lastSeen\");\n    if (lastSeen===undefined) {\n        lastSeen={};\n        context.set(\"lastSeen\",lastSeen);\n    }\n    var lastState = context.get(\"lastState\");\n    if (lastState===undefined) {\n        lastState={};\n        context.set(\"lastState\",lastState);\n    }\n    \n    var pad = function (num) {\n        return (\"0\"+num).slice(-2);\n    };\n    var formatLastSeen = function(lastSeen){\n        if (lastSeen>0) {\n            var secs = Math.floor((Date.now() - lastSeen) / 1000);\n            var minutes = Math.floor(secs / 60);\n            secs = secs%60;\n            var hours = Math.floor(minutes/60);\n            minutes = minutes%60;\n            var days = Math.floor(hours/24);\n            hours = hours%24;\n            if (days>0) {\n                return days+\"days \"+hours+\"hours ago\";\n            } else if (hours>0) {\n                return pad(hours)+\":\"+pad(minutes)+\" ago\";\n            } else if (minutes>0) {\n                return minutes+\"min ago\";\n            } else {\n                return secs+\"s ago\";\n            }\n        }\n        return \"n/a\";\n    }\n    \n    if (msg.hasOwnProperty(\"state\")) {\n        if (msg.state.hasOwnProperty(\"$state\")) {\n            // do not add timestamp if $status==\"lost\" (this is the LWT form the broker)\n            if (!lastSeen.hasOwnProperty(msg.topic)) lastSeen[msg.topic]={};\n            lastState[msg.topic]=msg.state.$state;\n            \n            if (msg.state.$state===\"lost\"){\n                if (lastSeen.hasOwnProperty(msg.topic)) {\n                    msg.state.lastSeenreadyFormatted=\"lost \"+formatLastSeen(lastSeen[msg.topic].ready);\n                } else {\n                    msg.state.lastSeenreadyFormatted=\"never seen\";\n                }\n            } else {\n                msg.state[\"lastSeen\"+msg.state.$state]=Date.now();\n                msg.state[\"lastSeen\"+msg.state.$state+\"Formatted\"]=formatLastSeen(lastSeen[msg.topic][msg.state.$state]);\n                lastSeen[msg.topic][msg.state.$state]=msg.state[\"lastSeen\"+msg.state.$state];\n            }\n        }\n    } else if (msg.payload.hasOwnProperty(\"command\")) {\n        switch (msg.payload.command) {\n            case \"updateData\":\n                msg.payload.arguments=[[]];\n                for (let topic in lastSeen) {\n                    if (lastSeen.hasOwnProperty(topic)) {\n                        let lineData={\"$topic\":topic};\n                        for (let value in lastSeen[topic]) {\n                            if (lastSeen[topic].hasOwnProperty(value)) {\n                                lineData[\"lastSeen\"+value]=lastSeen[topic][value];\n                                lineData[\"lastSeen\"+value+\"Formatted\"]=formatLastSeen(lastSeen[topic][value]);\n                            }\n                        }\n                        if (lastState[topic]===\"lost\") {\n                            if (lastSeen[topic].hasOwnProperty(\"ready\")) {\n                                lineData[\"lastSeenreadyFormatted\"]=\"lost \"+formatLastSeen(lastSeen[topic].ready); \n                            } else {\n                                lineData[\"lastSeenreadyFormatted\"]=\"never seen\";\n                            }\n                        }\n                        msg.payload.arguments[0].push(lineData);\n                    }\n                }\n                break;\n            default:\n                break;\n        }\n    }\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 366,
+        "y": 867,
+        "wires": [
+            [
+                "db94aa7b.554e88"
+            ]
+        ],
+        "icon": "node-red/timer.svg",
+        "info": "# build last seen timestamps\n## description\nThis function looks for msg.state.$state messages and add a timestamp (absolute and difference from last occurence)\n## how to use\n- Place this node in your data stream before the `handle tableData` node. The payload must be like this to be activated. Other messages will be passed through\n```\nmsg.payload.state={\n    $name : \"deviceName\",\n    $state : \"anyState\"\n}\n```\n\n- Place a inject node infront with msg.payload\n```json\n{\n    \"command\": \"updateData\",\n    \"column\": \"lastSeen\"\n}\n```\nto get the formatted last seen string updtated the inject node should repead every mnute or so. \n\n### last seen formatted\na formatted string is generated out of the last known timestamp saved in node context and the actual one. The difference between last occurance and the current time is formatted as a human readable string. This ist especially usefull to track `lost` or `sleeping` devices. As this string will change over time even when the value stays constant and is not updated by the mqtt the inject node should trigger every minute.\nThe `lost` state is handeled a little bit different as this is issued by the broker as a LWT (last will topic). in this case the timestamp is irrelevant because it is not issued by the device. The last seen timestamp of the `ready` state is used instead to issue the last time the device is seen. If the device was never seeen in since the start of this flow `never`will be sent.\n\nExample:\n\n- Input:\n```\nmsg.payload.state={\n    $name : \"deviceName\",\n    $state : \"ready\"\n}\n```\n- Output\n```\nmsg.payload.state={\n    $name : \"deviceName\",\n    $state : \"ready\",\n    lastSeenready : unixTimeStamp,\n    lastSeenreadyFormatted : \"01:10 ago\"\n}\n```\n\n### data storage\nNo database is required. Al data is stored in the **node context** on `default` context provider. As all data is **live** and automaticaly rebuild after restart is is not nessesary and not recomended that anything else than `memory Only` is used.\n\n- `lastSeen` _object_ stores all last seen values  to compare against new values to format the human readable string\n- `lastState` _object_ stores all last values of $state in order to handle the special `$state='lost'` "
+    },
+    {
+        "id": "1ded8052.c14b7",
+        "type": "inject",
+        "z": "9d52d40a.a63668",
+        "name": "update",
+        "topic": "updateColumn",
+        "payload": "{\"command\":\"updateData\",\"column\":\"lastSeen\"}",
+        "payloadType": "json",
+        "repeat": "60",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "x": 179,
+        "y": 901,
+        "wires": [
+            [
+                "9d9d213d.09396"
+            ]
+        ]
+    },
+    {
+        "id": "fec472fd.6a62e",
+        "type": "comment",
+        "z": "9d52d40a.a63668",
+        "name": "alternative HOMIE source",
+        "info": "",
+        "x": 212,
+        "y": 170,
+        "wires": []
+    },
+    {
+        "id": "5d93437e.17edac",
+        "type": "comment",
+        "z": "9d52d40a.a63668",
+        "name": "Homie convention source",
+        "info": "# homie convention source\n## introduction\nthe homie convention defines some statistic and firmware topics. The remote-device-table originates using the $stats and $fw properties defined in the homie convention 3.0.0 and later made available in version 4.0.0 through so called extensions.\nIf an alternative source provides all or some of the data it should first try to use the existing properties and perform conversions if nessesary.\n\n## reserved properties\nproperty | description | type    | format \n-------- | ----------- | ------- | ------ \n$homie | The implemented Homie convention version | **string** | \"4.0.0\"\n$name | the **unique** name of the device. This name is used to identify the device in the table. | string | \"myDevice\"\n$state | current or last state of the device | string | [\"ready\", \"lost\", \"init\", \"sleeping\", \"disconnected\", \"alert\"]\n$nodes\t| Nodes the device exposes | array | comma seperated list\n$extensions\t| Supported extensions | array | comma seperated list\n$implementation | An identifier for the Homie implementation | string | \"esp8266\"\n\n\n\ndefined by [**Legacy Firmware**](https://github.com/homieiot/convention/blob/develop/extensions/documents/homie_legacy_firmware_extension.md)\n\nproperty | description | type    | format\n-------- | ----------- | ------- | ------\n$localip | IP of the device on the local network | string | \"127.0.0.1\"\n$mac | Mac address of the device network interface | string | The format MUST be of the type `A1:B2:C3:D4:E5:F6`\nname | Name of the firmware running on the device. | string | Allowed characters are the same as the device ID\nversion | Version of the firmware running on the device. | string | \"1.0.0\"\n\n\ndefined by [**Legacy Stats**](https://github.com/homieiot/convention/blob/develop/extensions/documents/homie_legacy_stats_extension.md)\n\nproperty | description | type    | format\n-------- | ----------- | ------- | ------\ninterval | Interval in seconds at which the device refreshes its `$stats/+` | integer | Positive greater 0\nuptime | Time elapsed in seconds since the boot of the device | integer | seconds\nsignal | Signal strength | Integer | in %\ncputemp | CPU Temperature | Float | in °C\ncpuload | CPU Load in. Average of last $stats\\interval including all CPUs | Integer | %. \nbattery | Battery level. | Integer | in %\nfreeheap | Free heap. |\tPositive Integer | in bytes\nsupply | Supply Voltage | Float | in V\n\n",
+        "x": 212,
+        "y": 34,
+        "wires": []
+    },
+    {
+        "id": "f93d14b4.dbabf8",
+        "type": "comment",
+        "z": "9d52d40a.a63668",
+        "name": "alternative HTTP source",
+        "info": "",
+        "x": 212,
+        "y": 442,
+        "wires": []
+    },
+    {
+        "id": "5b5d7c00.8b9f34",
+        "type": "http request",
+        "z": "9d52d40a.a63668",
+        "name": "http get",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": false,
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 570,
+        "y": 493,
+        "wires": [
+            [
+                "96dbdf73.29262"
+            ]
+        ]
+    },
+    {
+        "id": "b20bd82e.30d678",
+        "type": "inject",
+        "z": "9d52d40a.a63668",
+        "name": "scan every hour",
+        "topic": "",
+        "payload": "scan",
+        "payloadType": "str",
+        "repeat": "3600",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "5",
+        "x": 192,
+        "y": 476,
+        "wires": [
+            [
+                "923430d4.60b79"
+            ]
+        ]
+    },
+    {
+        "id": "9db011a0.9b2f8",
+        "type": "json",
+        "z": "9d52d40a.a63668",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 900,
+        "y": 493,
+        "wires": [
+            [
+                "6cdb8ecf.f3af8"
+            ]
+        ]
+    },
+    {
+        "id": "96dbdf73.29262",
+        "type": "switch",
+        "z": "9d52d40a.a63668",
+        "name": "status == 200",
+        "property": "statusCode",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "200",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 743,
+        "y": 493,
+        "wires": [
+            [
+                "9db011a0.9b2f8"
+            ]
+        ]
+    },
+    {
+        "id": "6cdb8ecf.f3af8",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "translate ESPEasy",
+        "func": "// translate decoded JSON received by ESPEasy\nif (msg.payload.hasOwnProperty(\"System\")) {\n \n    // IMPORTTANT! \n    // Make shure that the topic matches the topic of homie state node that the extra data is merged correctly!\n    msg.topic=\"mqtt://192.168.2.14:1883/homie/\"+msg.payload.System[\"Unit Name\"];\n    // if you do not use the homie convention choose a unique indetifier as msg.topic:\n    // msg.topic=msg.payload.System[\"Unit Name\"];\n    \n    msg.state={\"$name\":msg.payload.System[\"Unit Name\"]};\n    msg.state.freeheap=msg.payload.System[\"Free RAM\"];\n    msg.state.uptime=msg.payload.System[\"Uptime\"];\n    msg.state.cpuload=msg.payload.System.Load;\n    msg.state.lastBootCause=msg.payload.System[\"Last Boot Cause\"];\n    msg.state.resetReason=msg.payload.System[\"Reset Reason\"];\n    msg.state.version=msg.payload.System.Build;\n    msg.state.name=\"ESP Easy Mega\";\n\n    if (msg.payload.hasOwnProperty(\"WiFi\")) {\n        msg.state.signal=Math.min(Math.max(2 * (msg.payload.WiFi.RSSI + 100), 0), 100)\n        msg.state.$localip=msg.payload.WiFi[\"IP Address\"];\n        msg.state.$mac=msg.payload.WiFi[\"STA MAC\"];\n        msg.state.SSID=msg.payload.WiFi.SSID;\n    }\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1059,
+        "y": 493,
+        "wires": [
+            [
+                "9cd8d3a8.dbb3d",
+                "e917f701.848748"
+            ]
+        ],
+        "icon": "node-red/swap.svg"
+    },
+    {
+        "id": "b8393c0b.3d7ec",
+        "type": "switch",
+        "z": "9d52d40a.a63668",
+        "name": "filter callbacks",
+        "property": "$exists(ui_control)",
+        "propertyType": "jsonata",
+        "rules": [
+            {
+                "t": "false"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 777,
+        "y": 1207,
+        "wires": [
+            [
+                "6f074131.3df08"
+            ],
+            [
+                "7adad4ad.104b3c",
+                "7f8fa749.5b4478"
+            ]
+        ]
+    },
+    {
+        "id": "f56ba748.951e28",
+        "type": "comment",
+        "z": "9d52d40a.a63668",
+        "name": "alternative MQTT source",
+        "info": "",
+        "x": 212,
+        "y": 272,
+        "wires": []
+    },
+    {
+        "id": "b9e8b34b.6ff15",
+        "type": "mqtt in",
+        "z": "9d52d40a.a63668",
+        "d": true,
+        "name": "",
+        "topic": "homie/+/System_Info/#",
+        "qos": "2",
+        "datatype": "utf8",
+        "broker": "6389f524.8a4e3c",
+        "x": 202,
+        "y": 306,
+        "wires": [
+            [
+                "31d656fb.78f2ca"
+            ]
+        ]
+    },
+    {
+        "id": "31d656fb.78f2ca",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "translate mqtt (ESPEasy SystemInfo plugin)",
+        "func": "var topicSplitted = msg.topic.split('/');\n\n// IMPORTTANT! \n// Make shure that the topic matches the topit of homie state node that the extra data is merged correctly!\nmsg.topic=\"mqtt://192.168.2.14:1883/\"+topicSplitted[0]+\"/\"+topicSplitted[1];\n\nmsg.state={\"$name\":topicSplitted[1]};\nswitch (topicSplitted[3].toLowerCase()) {\n    // messages that need conversion\n    case ('rssi'):\n        msg.state.signal=Math.min(Math.max(2 * (Number(msg.payload) + 100), 0), 100)\n        break;\n    case ('uptime'):\n        // ESPEasy sends uptime in minutes home defines uptime in seconds!\n        msg.state[topicSplitted[3]]=Number(msg.payload)*60;\n        break;\n    // all messages that can be translated 1:1    \n    case ('freestack'):\n    case ('freeheap'):\n        msg.state[topicSplitted[3]]=Number(msg.payload);\n        break;\n    default: // drop message\n        return;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 527,
+        "y": 306,
+        "wires": [
+            [
+                "fd874c09.b60e4",
+                "5e8155d9.d2b8bc"
+            ]
+        ],
+        "icon": "node-red/swap.svg"
+    },
+    {
+        "id": "3259206b.ed212",
+        "type": "comment",
+        "z": "9d52d40a.a63668",
+        "name": "homematic source",
+        "info": "",
+        "x": 192,
+        "y": 578,
+        "wires": []
+    },
+    {
+        "id": "23955b94.65ddd4",
+        "type": "ccu-rpc-event",
+        "z": "9d52d40a.a63668",
+        "name": "all devices",
+        "iface": "",
+        "ccuConfig": "dcd63e8.d157fc",
+        "rooms": "",
+        "roomsRx": "str",
+        "functions": "",
+        "functionsRx": "str",
+        "device": "",
+        "deviceRx": "str",
+        "deviceName": "",
+        "deviceNameRx": "str",
+        "deviceType": "",
+        "deviceTypeRx": "str",
+        "channel": "",
+        "channelRx": "str",
+        "channelName": "",
+        "channelNameRx": "str",
+        "channelType": "",
+        "channelTypeRx": "str",
+        "channelIndex": "",
+        "channelIndexRx": "str",
+        "datapoint": "",
+        "datapointRx": "str",
+        "change": true,
+        "working": false,
+        "cache": true,
+        "topic": "${device}/${datapoint}",
+        "x": 162,
+        "y": 612,
+        "wires": [
+            [
+                "b85c285e.bbe608",
+                "f28d6d58.f27d8"
+            ]
+        ]
+    },
+    {
+        "id": "b85c285e.bbe608",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "translate homematic",
+        "func": "const never=0;\nconst onChange=1;\nconst allways=2;\n\n// -----------------------------------------------------------------\n// example of a generic translator for msg.objects into state values\n//\n// this is WORK IN PROGRESS!\n// share improvements if you think they can be usefull to others\n//\n// -----------------------------------------------------------------\n\nvar translator={\n    \"$topic\":{\"properties\":[\"deviceType\",\"device\"],\"requited\":true,\"send\":allways},\n    \"$name\":{\"property\":\"deviceName\",\"default\":\"\",\"format\":\"\",\"requited\":true,\"send\":allways},\n    \"$state\":{\"property\":\"\",\"default\":\"ready\",\"format\":\"\",\"requited\":false,\"send\":allways},\n    \"$localip\":{\"property\":\"ccu\",\"default\":\"127.0.0.1\",\"format\":\"\",\"requited\":false,\"send\":onChange},\n    \"$mac\":{\"property\":\"\",\"default\":\"FF:FF:FF:FF:FF:FF\",\"format\":\"\",\"requited\":false,\"send\":never},\n    \"$implementation\":{\"property\":\"\",\"default\":\"Homematic\",\"format\":\"\",\"requited\":false,\"send\":onChange},\n    \"$nodes\":{\"property\":\"\",\"default\":[],\"format\":\"\",\"requited\":false,\"send\":never},\n    \"uptime\":{\"property\":\"\",\"default\":0,\"format\":\"\",\"requited\":false,\"send\":never},\n    \"interval\":[\n        {\"property\":\"deviceType=HM-RCV-50\",\"value\":\"\",\"default\":0,\"format\":\"\",\"requited\":false,\"send\":allways},\n        {\"property\":\"deviceType=HM-CC-RT-DN\",\"value\":\"\",\"default\":1200,\"format\":\"\",\"requited\":false,\"send\":allways},\n        {\"property\":\"deviceType=HM-WDS30-OT2-SM\",\"value\":\"\",\"default\":1800,\"format\":\"\",\"requited\":false,\"send\":allways},\n        {\"property\":\"deviceType=HMIP-PSM\",\"value\":\"\",\"default\":600,\"format\":\"\",\"requited\":false,\"send\":allways},\n        {\"property\":\"deviceType=HMIP-PS\",\"value\":\"\",\"default\":0,\"format\":\"\",\"requited\":false,\"send\":allways},\n        {\"property\":\"deviceType=HM-Sec-SCo\",\"value\":\"\",\"default\":0,\"format\":\"\",\"requited\":false,\"send\":allways}\n    ],\n    \"freeheap\":{\"property\":\"\",\"default\":0,\"format\":\"\",\"requited\":false,\"send\":never},\n    \"cpuload\":{\"property\":\"\",\"default\":0,\"format\":\"\",\"requited\":false,\"send\":never},\n    \"battery\":[\n        {\"property\":\"datapoint=BATTERY_STATE\",\"value\":\"value\",\"default\":0,\"format\":\"1.5:3.1\",\"translate\":\"%\",\"requited\":false,\"send\":allways},\n        {\"property\":\"datapoint=LOWBAT\",\"value\":\"value\",\"default\":false,\"format\":\"true:false\",\"translate\":\"%\",\"requited\":false,\"send\":allways}\n    ],\n    \"supply\":{\"property\":\"datapoint=BATTERY_STATE\",\"value\":\"value\",\"default\":0,\"format\":\"1.5:4.6\",\"requited\":false,\"send\":allways},\n    \"signal\":{\"property\":\"RSSI_PEER\",\"default\":0,\"format\":\"0:100\",\"requited\":false,\"send\":allways},\n    \"name\":{\"property\":\"deviceType\",\"default\":\"Homematic\",\"format\":\"\",\"requited\":false,\"send\":onChange},\n    \"version\":{\"property\":\"iface\",\"default\":\"0.0.1\",\"format\":\"\",\"requited\":false,\"send\":onChange},\n    \"room\":{\"property\":\"room\",\"default\":\"\",\"format\":\"\",\"requited\":false,\"send\":onChange}\n}\n\nvar status = {fill:\"red\",shape:\"dot\",text: \"payload=\"+msg.payload};\nvar getValue = function (theMsg,property) {\n    if (typeof property === \"string\") {\n        var splitted = property.split('.');\n        for (let currentObject of splitted) {\n            if (theMsg.hasOwnProperty(currentObject)) {\n                theMsg=theMsg[currentObject];\n            } else {\n                return undefined;\n            }\n        }\n        return theMsg;\n    } else node.error(\"[translate] property:'\"+property+\"' not a string\");\n}\n\nvar currentProperty = {};\nvar value;\nvar sendStore=context.get(\"sendStore\") || {};\nvar index;\n\nif (!msg.hasOwnProperty(\"state\")) msg.state={};\nfor (let property in translator) {\n    if (translator.hasOwnProperty(property)) {\n        properties = (Array.isArray(translator[property])) ? translator[property] : [translator[property]]\n        for (currentProperty of properties) {\n            if (property===\"$topic\" && (Array.isArray(currentProperty.properties))) {\n                msg.state[property]=\"\"\n                for (let element of currentProperty.properties) {\n                    value = getValue(msg,element);\n                    if (value !== undefined) msg.state[property]+=value;\n                }\n                index=msg.state[property];\n            } else {\n                if (currentProperty.hasOwnProperty(\"property\")) {\n                    if (currentProperty.property!==\"\") {\n                        \n                        // if there is a conditional property defined\n                        if (currentProperty.property.includes(\"=\")) {\n                            //node.warn([currentProperty.property,typeof currentProperty.property]);\n                            let propertySplitted=currentProperty.property.split(\"=\");\n                            if (getValue(msg,propertySplitted[0])===propertySplitted[1]) {\n                                if (currentProperty.translate===\"%\") { // if Translator for %\n                                    let formatSplitted=currentProperty.format.split(\":\");\n                                    if (formatSplitted[0]===\"true\" || formatSplitted[0]===\"false\") {\n                                        let min=(formatSplitted[0]===\"true\") ? true : false;\n                                        if (getValue(msg,currentProperty.value)===min) { // set % values for boolean values\n                                            msg.state[property]=25;\n                                        } else {\n                                            msg.state[property]=75;\n                                        }\n                                    } else {\n                                        // rescale percentage to given format \"min:max\"\n                                        let min=Number(formatSplitted[0]);\n                                        let max=Number(formatSplitted[1]);\n                                        msg.state[property]=Math.floor(100/(max-min)*(Number(getValue(msg,currentProperty.value))-min));\n                                    }\n                                } else {\n                                    if (currentProperty.value!==\"\") {\n                                        msg.state[property]=getValue(msg,currentProperty.value);\n                                    } else {\n                                        msg.state[property]=currentProperty.default;\n                                    }\n                                }\n                            }\n                        } else {\n                            if (currentProperty.property!=='') {\n                                msg.state[property]=getValue(msg,currentProperty.property);\n                            } else {\n                                msg.state[property]=currentProperty.default;\n                            }\n                        }\n                    } else {\n                        msg.state[property]=currentProperty.default;\n                    }\n                    if (currentProperty.send===onChange) {\n                        if (!sendStore.hasOwnProperty(index)) sendStore[index]={};\n                        if (!sendStore[index].hasOwnProperty(property) || sendStore[index][property]===null) {\n                            sendStore[index][property]=msg.state[property];\n                            context.set(\"sendStore\",sendStore);\n                        } else {\n                            if (sendStore[index][property]===msg.state[property]) {\n                                // node.warn([\"delete onChange\",index,property,sendStore[index],sendStore[index].hasOwnProperty(property),sendStore[index][property]]);\n                                delete msg.state[property]\n                            } else {\n                                sendStore[index][property]=msg.state[property];\n                            }\n                        }\n                    } \n                    if (currentProperty.send===never) {\n                        delete msg.state[property]\n                    }\n                }\n                if (property===\"$name\") {\n                    status.fill=\"green\";\n                    status.text=msg.state[property]+\"=\"+msg.state[property];\n                }\n            }\n            if (currentProperty.required && !msg.state.hasOwnProperty(property)) {\n                status.text=\"required \"+property+\" \"+msg.state[property];\n            }\n        }\n    }\n}\n// check if required attributes exists\nfor (let property in translator) {\n    if (translator[property].required) { // if any requitred property is missing dispose complete msg.state\n        if (!msg.state.hasOwnProperty(property)) {\n            node.warn([property+\" undefined\",msg.payload]);\n            status.fill=\"red\";\n            status.text=\"required \"+property+\" undefined\";\n            delete msg.state;\n            break;\n        }\n    }\n}\nmsg.topic=msg.state.$topic;\nnode.status(status);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 372,
+        "y": 612,
+        "wires": [
+            [
+                "5ec354ef.9218cc",
+                "b4f3194a.c9e198"
+            ]
+        ],
+        "info": "# generic translator (here for Homematic devices)\n\nThis function node is a generic translator for data comming in as a msg object. As an example the converting data from the homematic in node to msg.state is performed.\n\n## theory of operation\n\nThe remote device table originates in the [homie convention](https://homieiot.github.io) but can be relatively easyly adapted for other systems. If ever possible the data from other systems should be merged into the homie convention properties to keep the amount of columns in the table low and make it easy to be compared, sorted and filtered. But feel free to add additional proerties as you like. Some properties a essential and should not be changed\n\n** required properties **\n- **$topic** essential is a unique index. Unique in this case means unique for ALL remote devices. Otherwise you will get different devices merged into each other. `msg.state.$topic` will be copied into msg.topic to make it easier to access\n- **$name** should be unique and will be inside one mqtt base topic but as every row is identified by $topic it could be edited.\n- **$state** current or last known state of the device | string | [\"ready\", \"lost\", \"init\", \"sleeping\", \"disconnected\", \"alert\"\n\n** special properties **\n\n- **interval** If your device do not provide the inteval ime (on seconds) it could be expected to send updates you should set the fefault to an apropiate time. The `$state watchdog` uses this to set a individual timeout for each device. Set it to 0 when you do not expect regular updates.\n \n## suggested / reserved properties\n\nThis properties are defined by the homie convention and should be used if possible!\n\nproperty | description | type    | format \n-------- | ----------- | ------- | ------ \n$homie | The implemented Homie convention version | **string** | \"4.0.0\"\n$name | the **unique** name of the device. This name is used to identify the device in the table. | string | \"myDevice\"\n$state | current or last state of the device | string | [\"ready\", \"lost\", \"init\", \"sleeping\", \"disconnected\", \"alert\"]\n$nodes\t| Nodes the device exposes | array | comma seperated list\n$extensions\t| Supported extensions | array | comma seperated list\n$implementation | An identifier for the Homie implementation | string | \"esp8266\"\n\n\n\ndefined by [**Legacy Firmware**](https://github.com/homieiot/convention/blob/develop/extensions/documents/homie_legacy_firmware_extension.md)\n\nproperty | description | type    | format\n-------- | ----------- | ------- | ------\n$localip | IP of the device on the local network | string | \"127.0.0.1\"\n$mac | Mac address of the device network interface | string | The format MUST be of the type `A1:B2:C3:D4:E5:F6`\nname | Name of the firmware running on the device. | string | Allowed characters are the same as the device ID\nversion | Version of the firmware running on the device. | string | \"1.0.0\"\n\n\ndefined by [**Legacy Stats**](https://github.com/homieiot/convention/blob/develop/extensions/documents/homie_legacy_stats_extension.md)\n\nproperty | description | type    | format\n-------- | ----------- | ------- | ------\ninterval | Interval in seconds at which the device refreshes its `$stats/+` | integer | Positive greater 0\nuptime | Time elapsed in seconds since the boot of the device | integer | seconds\nsignal | Signal strength | Integer | in %\ncputemp | CPU Temperature | Float | in °C\ncpuload | CPU Load in. Average of last $stats\\interval including all CPUs | Integer | %. \nbattery | Battery level. | Integer | in %\nfreeheap | Free heap. |\tPositive Integer | in bytes\nsupply | Supply Voltage | Float | in V\n\n"
+    },
+    {
+        "id": "677977e5.f274b8",
+        "type": "link out",
+        "z": "9d52d40a.a63668",
+        "name": "toPlugins",
+        "links": [
+            "c9b41f12.1c433"
+        ],
+        "x": 389,
+        "y": 68,
+        "wires": []
+    },
+    {
+        "id": "9e278daa.10534",
+        "type": "link out",
+        "z": "9d52d40a.a63668",
+        "name": "toPlugins",
+        "links": [
+            "c9b41f12.1c433"
+        ],
+        "x": 576,
+        "y": 187,
+        "wires": []
+    },
+    {
+        "id": "fd874c09.b60e4",
+        "type": "link out",
+        "z": "9d52d40a.a63668",
+        "name": "toPlugins",
+        "links": [
+            "c9b41f12.1c433"
+        ],
+        "x": 746,
+        "y": 306,
+        "wires": []
+    },
+    {
+        "id": "b563fdad.d0b7c",
+        "type": "link in",
+        "z": "9d52d40a.a63668",
+        "name": "Watchdog",
+        "links": [
+            "466c4805.365698",
+            "5ec354ef.9218cc",
+            "13055b32.2932e5"
+        ],
+        "x": 134,
+        "y": 816,
+        "wires": [
+            [
+                "84e3502f.6ee37"
+            ]
+        ]
+    },
+    {
+        "id": "9cd8d3a8.dbb3d",
+        "type": "link out",
+        "z": "9d52d40a.a63668",
+        "name": "toPlugins",
+        "links": [
+            "c9b41f12.1c433"
+        ],
+        "x": 1188,
+        "y": 493,
+        "wires": []
+    },
+    {
+        "id": "5ec354ef.9218cc",
+        "type": "link out",
+        "z": "9d52d40a.a63668",
+        "name": "toPlugins",
+        "links": [
+            "b563fdad.d0b7c"
+        ],
+        "x": 559,
+        "y": 612,
+        "wires": []
+    },
+    {
+        "id": "1a9973b1.ea925c",
+        "type": "link out",
+        "z": "9d52d40a.a63668",
+        "name": "toTable",
+        "links": [
+            "b1750dea.ac9c2"
+        ],
+        "x": 525,
+        "y": 1071,
+        "wires": []
+    },
+    {
+        "id": "b1750dea.ac9c2",
+        "type": "link in",
+        "z": "9d52d40a.a63668",
+        "name": "Table",
+        "links": [
+            "1a9973b1.ea925c",
+            "c7c4ccfa.7acd8",
+            "c59b8c64.16dc7"
+        ],
+        "x": 236,
+        "y": 1309,
+        "wires": [
+            [
+                "7adad4ad.104b3c"
+            ]
+        ]
+    },
+    {
+        "id": "2e57f70c.496118",
+        "type": "comment",
+        "z": "9d52d40a.a63668",
+        "name": "Plugins",
+        "info": "",
+        "x": 152,
+        "y": 765,
+        "wires": []
+    },
+    {
+        "id": "248e0178.34da0e",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "resetCounter",
+        "func": "if (msg.hasOwnProperty(\"payload\") && msg.payload.hasOwnProperty(\"command\")) {\n    switch (msg.payload.command) {\n        case \"deleteTable\":\n            context.set(\"tableData\",undefined);\n            node.status({fill:\"yellow\",shape:\"dot\",text:\"tableData deleted\"});\n            node.warn(\"[resetCounter] tableData deleted\");\n            return msg;\n    }\n}\nconst pluginName=\"resetCounter\";\nconst triggerProperty=\"uptime\";\n\nvar status = {fill:\"red\",shape:\"dot\",text: \"payload=\"+msg.payload};\n// only trigger if msg.state exits and contains the property $name as a unique identifier\nif (msg.hasOwnProperty(\"state\") && msg.topic!==undefined && msg.topic!==\"\") {\n    status.text=\"device=\";\n    status.text+=(msg.state.$name) ? msg.state.$name : msg.topic;\n    status.fill=\"yellow\";\n    // if the plugin needs to save context data\n    var deviceName = msg.topic;\n    var tableData = context.get(\"tableData\",\"file\");\n    if (tableData===undefined) {\n        tableData={};\n        context.set(\"tableData\",tableData,\"file\");\n    }\n    // if the plugin only reacts on certain values (i.e. uptime)\n    if (msg.state.hasOwnProperty(triggerProperty)) {\n        if (!tableData.hasOwnProperty(deviceName)) {\n            tableData[deviceName]={\n                \"resetTotal\":0,\n                \"totalRuntime\":0\n            }\n        }\n        var tableRow=tableData[deviceName];\n        var success=false;\n        \n        // -------------------------------------------------\n        var dateNow=Date.now();\n        if (msg.state.hasOwnProperty(\"$status\")) {\n            switch (msg.state.$status) {\n                case \"sleeping\":\n                    //tableRow.totalRuntime+=tableRow.lastUptime;\n                    tableRow.lastUptime=0;\n                    status.text=\" sleeping\";\n                    break;\n                case \"lost\":\n                    tableRow.lostSince=dateNow;\n                    break;\n            }\n        }\n        if (tableRow.hasOwnProperty(\"lastUptime\")) {\n            // node.warn([msg.state.uptime,tableRow.lastUptime]);\n            if (Number(msg.state.uptime) < tableRow.lastUptime) { // reset detected!\n                if (tableRow.hasOwnProperty(\"lostSince\")) {\n                    tableRow.resetPeriodLast = tableRow.lostSince-tableRow.resetLast;\n                    delete tableRow.resetLast;\n                    delete tableRow.lostSince;\n                }\n                if (tableRow.hasOwnProperty(\"resetLast\")) {\n                    tableRow.resetPeriodLast = dateNow-tableRow.resetLast;\n                }\n                if (tableRow.resetTotal>0) {\n                    tableRow.resetAverage = Math.floor(tableRow.totalRuntime / tableRow.resetTotal);\n                    msg.state.resetAverage=tableRow.resetAverage;\n                    msg.state.resetTotal=tableRow.resetTotal;\n                    msg.state.resetLast=tableRow.resetLast;\n                    msg.state.totalRuntime=tableRow.totalRuntime;\n                }\n            \n                tableRow.resetLast=dateNow;\n                ++tableRow.resetTotal;\n            } else { // device alive - counting up\n                tableRow.totalRuntime += Number(msg.state.uptime)-tableRow.lastUptime;\n            }\n            tableRow.lastUptime=Number(msg.state.uptime);\n        } else { // first recorded uptime + first seen\n            tableRow.lastUptime=Number(msg.state.uptime);\n            tableRow.totalRuntime=tableRow.lastUptime;\n            if (!tableRow.hasOwnProperty(\"firstSeen\")) {\n                tableRow.firstSeen=dateNow;\n                msg.state.firstSeen=dateNow;\n            }\n        }\n        success=true;\n        // -------------------------------------------------\n        \n        if (success) {\n            if (msg.state.hasOwnProperty(\"resetTotal\")) {\n                status.fill=\"green\"\n                status.text=msg.topic+\" resets=\"+msg.state.resetTotal;\n                node.status(status);\n            }\n        } else {\n            status.error({\"pluginName\":pluginName,triggerProperty:msg.state[triggerProperty],\"state\":msg.state})\n            status.text=\"Error device:\"+msg.topic+\" \"+triggerProperty+\"=\"+msg.state[triggerProperty];\n            node.status(status);           \n        }\n    }\n}\n// always pass the original message (+ additional data as suitable)\n// node.warn([\"reset\",msg.topic])\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 376,
+        "y": 969,
+        "wires": [
+            [
+                "eca05dcd.06bd4"
+            ]
+        ],
+        "info": "# reset counter\nDetection of device resets. A reset of a device delivering a uptime value can be detected if the delivered uptime value is lower than the value before.\nIf `msg.state.$state==\"lost\"` is detected a timestamp is recorded. if a new `uptime<lastUptime` is detected the recorded \"lost\" timestamp is used insted of `date.now()`\nif `msg.state.$sate==\"sleeping\"` is detected a timestamp is recorded. On next `ready` the lastUptime is set to 0 so the lower `uptime` does not count as a reset.\n\n## context store\n\n`tabledata` in node context. As the totalRuntime should be calculated over flow restart / reset it shoul be saved to persistent memory\n\n## property trigger\n`msg.state.uptime` period between boot and now _in seconds_\n\n## properties used / required\nproperty | required | unique\n-------- | -------- | -------\n`msg.state.$name` | **required** | **unique**\n`msg.state.uptime` | **required** |\n`msg.state.$lost` | **optional** |\n\n\n## values added\nproperty | description | unit\n-------- | ----------- | ----\n`msg.state.resetAverage` | average period between resets | _in ms_\n`msg.state.resetTotal` | total resets detected | _integer_\n`msg.state.resetLast` | last reset detected | _unix timestamp_\n`msg.state.totalRuntime` | total runtime from first detection to now | _in ms_"
+    },
+    {
+        "id": "eca05dcd.06bd4",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "sleepTimer",
+        "func": "const pluginName=\"sleepTimer\"; // give the plugin a unique name\nconst triggerProperty=\"$state\"; // if the plugin triggers on one specific property you can specifie it here\nconst contextName=\"tableData\"; // name of context store\n\nif (msg.hasOwnProperty(\"payload\") && msg.payload.hasOwnProperty(\"command\")) {\n    switch (msg.payload.command) {\n        case \"deleteTable\":\n            context.set(contextName,undefined);\n            node.status({fill:\"yellow\",shape:\"dot\",text:contextName+\" deleted\"});\n            node.warn(\"[\"+pluginName+\"] \"+contextName+\"deleted\");\n            return msg;\n    }\n}\n\nvar status = {fill:\"red\",shape:\"dot\",text: \"payload=\"+msg.payload};\n// only trigger if msg.state exitst and contains the property $name as a unique identifier\nif (msg.hasOwnProperty(\"state\") && msg.topic!==undefined && msg.topic!==\"\") {\n    status.text=\"device=\";\n    status.text+=(msg.state.$name) ? msg.state.$name : msg.topic;\n    status.fill=\"yellow\";\n    // if the plugin needs to save context data\n    var deviceName = msg.topic;\n    var tableData = context.get(contextName);\n    if (tableData===undefined) {\n        tableData={};\n        context.set(contextName,tableData);\n    }\n    // if the plugin only reacts on certain values (i.e. uptime)\n    if (msg.state.hasOwnProperty(triggerProperty)) { // add additional triggers here\n        if (!tableData.hasOwnProperty(deviceName)) {\n            if (msg.state[triggerProperty]==='sleeping') { // only activate if device is sleeping once\n                tableData[deviceName]={};\n                msg.state.sleepMode=true;\n            } else {\n                msg.state.sleepMode=false;\n                return msg; // sleepMode not enabled yet\n            }\n        }\n        var tableRow=tableData[deviceName];\n        var success=false;\n        \n        // -------------------------------------------------\n        var dateNow=Date.now();\n        switch (msg.state[triggerProperty]) {\n            case 'sleeping':\n                if (tableRow.lastEvent==='ready' && tableRow.hasOwnProperty('awakeTimestamp')) {\n                    tableRow.awakeTime=Math.floor((dateNow - tableRow.awakeTimestamp)/1000); // in seconds\n                }\n                if (tableRow.lastEvent!=='sleeping') {\n                    tableRow.sleepTimestamp=dateNow;\n                    tableRow.lastEvent='sleeping';\n                }\n                break;\n            case 'ready':\n                if (tableRow.lastEvent==='sleeping' && tableRow.hasOwnProperty('sleepTimestamp')) {\n                    tableRow.sleepTime=Math.floor((dateNow - tableRow.sleepTimestamp)/1000); // in seconds\n                }\n                if (tableRow.lastEvent!=='ready') {\n                    tableRow.awakeTimestamp=dateNow;\n                    tableRow.lastEvent='ready';\n                }\n                break;\n            case 'lost':\n                if (tableRow.lastEvent!=='lost') {\n                    // device went from sleeping to lost\n                    if (tableRow.lastEvent==='sleeping' && tableRow.hasOwnProperty('sleepTimestamp')) {\n                        tableRow.sleepTime=Math.floor((dateNow - tableRow.sleepTimestamp)/1000); // in seconds\n                        delete tableRow.sleepTimestamp;\n                    }\n                    // device went form ready to lost\n                    if (tableRow.lastEvent==='ready' && tableRow.hasOwnProperty('awakeTimestamp')) {\n                        tableRow.awakeTime=Math.floor((dateNow - tableRow.awakeTimestamp)/1000); // in seconds\n                        delete tableRow.awakeTimestamp;\n                    }\n                    tableRow.lastEvent='lost';\n                }\n                break;\n            case 'diconnected':\n                delete tableData[deviceName];\n                status.text+=\" disconnected\";\n                break;\n        }\n        if (tableRow.hasOwnProperty('sleepTime') && tableRow.hasOwnProperty('awakeTime')) {\n            msg.state.sleepRatio=tableRow.awakeTime / tableRow.sleepTime * 100;\n            // msg.state.sleepTime=msg.sleepTime;\n            // msg.state.awakeTime.msg.awakeTime;\n        }\n        success=true;\n        // -------------------------------------------------\n        \n        if (success) {\n            status.fill=\"green\"\n            status.text+=\" \"+triggerProperty+\"=\"+msg.state[triggerProperty];\n            node.status(status);\n        } else {\n            status.error({\"pluginName\":pluginName,triggerProperty:msg.state[triggerProperty],\"state\":msg.state})\n            status.text+=\" Error \"+triggerProperty+\"=\"+msg.state[triggerProperty];\n            node.status(status);           \n        }\n    }\n}\n// allways pass the original message (+ additional data as suitable)\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 376,
+        "y": 1020,
+        "wires": [
+            [
+                "c03f0c10.6229f"
+            ]
+        ],
+        "info": "# sleep timer\nMeasures the sleep and awake time and gives a ratio in %\n\n## context store\n\n`tableData` in node context to store sleep and awake events\n\n## property trigger\n`$state` state changes:\n- `sleeping` begin of sleep period\n- `ready` or `init` begin of awake period\n- `lost` device offline period not added to calculation\n- `diconnected` delete value in tableData\n\n## properties used / required\nproperty | required | unique\n-------- | -------- | -------\n`msg.state.$name` | **required** | **unique**\n\n\n## values added or modified\n\nproperty | modification | description | unit\n-------- | ------------ | ----------- | ----\n`msg.state.sleepMode` | new | device usiong sleep mode | *boolean*\n`msg.state.sleepRatio` | new | percentage of time running | *integer* _in %_\n`msg.state.sleepTime` | optional | time sleeping | *integer* _in seconds_\n`msg.state.awakeTime` | optional | time awake | *integer* _in seconds_"
+    },
+    {
+        "id": "c03f0c10.6229f",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "pluginTemplate",
+        "func": "const pluginName=\"pluginTemplate\"; // give the plugin a unique name\nconst triggerProperty=\"uptime\"; // if the plugin triggers on one specific property you can specifie it here\nconst contextName=\"tableData\"; // name of context store\n\nif (msg.hasOwnProperty(\"payload\") && msg.payload.hasOwnProperty(\"command\")) {\n    switch (msg.payload.command) {\n        case \"deleteTable\":\n            context.set(contextName,undefined);\n            node.status({fill:\"yellow\",shape:\"dot\",text:contextName+\" deleted\"});\n            node.warn(\"[\"+pluginName+\"] \"+contextName+\"deleted\");\n            return msg;\n    }\n}\n\nvar status = {fill:\"red\",shape:\"dot\",text: \"payload=\"+msg.payload};\n// only trigger if msg.state exitst and contains the property $name as a unique identifier\nif (msg.hasOwnProperty(\"state\") && msg.topic!==undefined && msg.topic!==\"\") {\n    status.text=\"device=\";\n    status.text+=(msg.state.$name) ? msg.state.$name : msg.topic;\n    status.fill=\"yellow\";\n    // if the plugin needs to save context data\n    var deviceName = msg.topic;\n    var tableData = context.get(contextName);\n    if (tableData===undefined) {\n        tableData={};\n        context.set(contextName,tableData);\n    }\n    // if the plugin only reacts on certain values (i.e. uptime)\n    if (msg.state.hasOwnProperty(triggerProperty)) { // add additional triggers here\n        if (!tableData.hasOwnProperty(deviceName)) tableData[deviceName]={}\n        var tableRow=tableData[deviceName];\n        var success=false;\n        \n        // -------------------------------------------------\n        // place your code here\n        // if success leave with\n        success=true;\n        // -------------------------------------------------\n        \n        if (success) {\n            status.fill=\"green\"\n            status.text+=\" \"+triggerProperty+\"=\"+msg.state[triggerProperty];\n            node.status(status);\n        } else {\n            status.error({\"pluginName\":pluginName,triggerProperty:msg.state[triggerProperty],\"state\":msg.state})\n            status.text+=\" Error \"+triggerProperty+\"=\"+msg.state[triggerProperty];\n            node.status(status);           \n        }\n    }\n}\n// allways pass the original message (+ additional data as suitable)\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 386,
+        "y": 1071,
+        "wires": [
+            [
+                "1a9973b1.ea925c",
+                "2074fe0f.a481a2"
+            ]
+        ],
+        "info": "# plugin template\nYou can use this template to write your own plugin. Please take the time and publish plugins others might like to use.\n\n## context store\n\n`tabledata` in node context. Using memory only (recomended unless usefull)\n\n## property trigger\n`uptime` period between boot and now _in seconds_\n\n## properties used / required\nproperty | required | unique\n-------- | -------- | -------\n`msg.state.$name` | **required** | **unique**\n`msg.state.uptime` | **required** |\n`msg.state.$lost` | **optional** |\n\n\n## values added or modified\nif the plugin modifies existing properties please make sure that the following flow and the table are aware!\nproperty | modification | description | unit\n-------- | ------------ | ----------- | ----\n`msg.state.newProperty` | new | average period between resets | _in ms_\n"
+    },
+    {
+        "id": "7adad4ad.104b3c",
+        "type": "subflow:2924702c.b33a7",
+        "z": "9d52d40a.a63668",
+        "name": "",
+        "env": [
+            {
+                "name": "tabulator",
+                "value": "{\"customHeight\":18,\"tabulator\":{\"responsiveLayout\":\"collapse\",\"responsiveLayoutCollapseStartOpen\":false,\"index\":\"$topic\",\"layout\":\"fitColumns\",\"movableColumns\":true,\"groupBy\":\"\",\"columns\":[{\"formatter\":\"responsiveCollapse\",\"width\":30,\"minWidth\":30,\"align\":\"center\",\"resizable\":false,\"headerSort\":false,\"frozen\":true,\"title\":\"Expand&nbsp;&nbsp;<i class='fa fa-plus-circle'></i> \",\"field\":\"expand\",\"headerVertical\":\"flip\",\"headerTooltip\":\"click to expand more details\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"formatter\":\"function(cell, formatterParams, onRendered) {      var html = cell.getValue(); return html;  }\",\"title\":\"State&nbsp;&nbsp;<i class='fa fa-bolt fa-rotate-90'></i>\",\"field\":\"$stateIcon\",\"width\":40,\"align\":\"center\",\"frozen\":true,\"headerVertical\":\"flip\",\"headerTooltip\":\"current state as icon: init, ready, lost, sleeping, disconnected or alert\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"formatter\":\"function(cell, formatterParams, onRendered) {     var html = cell.getValue(); return html;  }\",\"title\":\"Signal&nbsp;&nbsp;<i class='fa fa-signal fa-rotate-90'></i>\",\"field\":\"signalIcon\",\"width\":40,\"align\":\"center\",\"frozen\":true,\"headerVertical\":\"flip\",\"headerTooltip\":\"signal quality for wireless devices (signalIcon)\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"title\":\"Name&nbsp;&nbsp;<i class='fa fa-tag fa-rotate-90'></i>\",\"field\":\"$name\",\"width\":140,\"frozen\":true,\"tooltip\":true,\"headerVertical\":\"flip\",\"headerTooltip\":\"name of the device ($name)\",\"editor\":\"input\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContextNoHide'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"title\":\"State&nbsp;&nbsp;<i class='fa fa-star-half-o'></i> \",\"field\":\"$state\",\"width\":65,\"align\":\"center\",\"headerVertical\":\"flip\",\"headerTooltip\":\"current state: init, ready, lost, sleeping, disconnected or alert\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"title\":\"last seen&nbsp;&nbsp;<i class='fa fa-clock-o fa-rotate-90'></i>\",\"field\":\"lastSeenreadyFormatted\",\"width\":80,\"align\":\"right\",\"tooltip\":true,\"headerVertical\":\"flip\",\"headerTooltip\":\"time since the device was sending $state updates\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"title\":\"Location&nbsp;&nbsp;<i class='fa fa-map-marker fa-rotate-90'></i>\",\"field\":\"room\",\"width\":100,\"headerTooltip\":\"location of the device (room)\",\"tooltip\":true,\"headerVertical\":\"flip\",\"editor\":\"autocomplete\",\"editorParams\":{\"freetext\":true,\"allowEmpty\":true,\"showListOnEmpty\":true,\"values\":true},\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"title\":\"<i class='fa fa-area-chart'></i> Statistics\",\"columns\":[{\"title\":\"interval&nbsp;&nbsp;<i class='fa fa-undo'></i>\",\"field\":\"interval\",\"width\":40,\"headerVertical\":\"flip\",\"headerTooltip\":\"device update interval\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"formatterParams\":{\"outputFormat\":\"d hh:mm:ss\",\"inputFormat\":\"seconds\",\"invalidPlaceholder\":\"(unknown)\"},\"title\":\"uptime&nbsp;&nbsp;<i class='fa fa-clock-o'></i>\",\"field\":\"uptime\",\"formatter\":\"function(cell, formatterParams, onRendered){     var pad = function (num) {         return (\\\"0\\\"+num).slice(-2);     };     var secs = Number(cell.getValue());     if (Number.isNaN(secs)) return;     var minutes = Math.floor(secs / 60);     secs = secs%60;     var hours = Math.floor(minutes/60);     minutes = minutes%60;     var days = Math.floor(hours/24);     hours = hours%24;     if (days>0)         return days+\\\"d \\\"+pad(hours)+\\\":\\\"+pad(minutes);     else         return pad(hours)+\\\":\\\"+pad(minutes)+\\\":\\\"+pad(secs); }\",\"width\":75,\"headerVertical\":\"flip\",\"headerTooltip\":\"device uptime\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"formatterParams\":{\"min\":0,\"max\":100,\"color\":[\"red\",\"orange\",\"green\"],\"legend\":\"function (value) {if (value>0) return \\\"<span style='color:#FFFFFF;'>\\\"+value+\\\" %</span>\\\"; else return; }\",\"legendColor\":\"#FFFFFF\",\"legendAlign\":\"center\"},\"title\":\"signal&nbsp;&nbsp;<i class='fa fa-wifi'></i>\",\"field\":\"signal\",\"formatter\":\"progress\",\"width\":70,\"headerVertical\":\"flip\",\"headerTooltip\":\"device wireless signal quality\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"formatterParams\":{\"min\":2.5,\"max\":3.5,\"color\":[\"red\",\"green\",\"red\"],\"legend\":\"function (value) { if (value>0) return \\\"<span style='color:#FFFFFF;'>\\\"+value+\\\" V</span>\\\"; else return; }\",\"legendColor\":\"#101010\",\"legendAlign\":\"center\"},\"title\":\"supply&nbsp;&nbsp;<i class='fa fa-plug'></i>\",\"field\":\"supply\",\"formatter\":\"progress\",\"width\":70,\"headerVertical\":\"flip\",\"headerTooltip\":\"device supply voltage\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"formatterParams\":{\"min\":0,\"max\":100,\"color\":[\"red\",\"orange\",\"green\"],\"legend\":\"function (value) {     if (value>0)         return \\\"<span style='color:#FFFFFF;'>\\\"+value+\\\" %</span>\\\";     else         return; }\",\"legendColor\":\"#101010\",\"legendAlign\":\"center\"},\"title\":\"battery&nbsp;&nbsp;<i class='fa fa-battery-2'></i>\",\"field\":\"battery\",\"formatter\":\"progress\",\"width\":70,\"headerVertical\":\"flip\",\"headerTooltip\":\"device battery level in %\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"formatterParams\":{\"min\":0,\"max\":100000,\"color\":[\"red\",\"orange\",\"green\"],\"legend\":\"function (value) { if (value>0) return \\\"<span style='color:#FFFFFF;'>\\\"+(value/1024).toFixed(2)+\\\" kB</span>\\\"; else return; }\",\"legendColor\":\"#101010\",\"legendAlign\":\"right\"},\"title\":\"memory&nbsp;&nbsp;<i class='fa fa-microchip'></i>\",\"field\":\"freeheap\",\"formatter\":\"progress\",\"width\":70,\"headerVertical\":\"flip\",\"headerTooltip\":\"device free heap memory in kb\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"formatterParams\":{\"min\":0,\"max\":100,\"color\":[\"red\",\"orange\",\"green\"],\"legend\":\"function (value) {     if (value>0)         return \\\"<span style='color:#FFFFFF;'>\\\"+value+\\\" %</span>\\\";     else         return; }\",\"legendColor\":\"#101010\",\"legendAlign\":\"right\"},\"title\":\"load&nbsp;&nbsp;<i class='fa fa-tasks'></i>\",\"field\":\"cpuload\",\"formatter\":\"progress\",\"width\":70,\"headerVertical\":\"flip\",\"headerTooltip\":\"device cpu load in %\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"formatterParams\":{\"min\":20,\"max\":60,\"color\":[\"green\",\"orange\",\"red\"],\"legend\":\"function (value) { if (value>0) return \\\"<span style='color:#FFFFFF;'>\\\"+value+\\\" °C</span>\\\"; else return; }\",\"legendColor\":\"#101010\",\"legendAlign\":\"right\"},\"title\":\"temp&nbsp;&nbsp;<i class='fa fa-thermometer-half'></i>\",\"field\":\"cputemp\",\"formatter\":\"progress\",\"width\":70,\"headerVertical\":\"flip\",\"headerTooltip\":\"device cpu temperature in °C\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"}]},{\"title\":\"<i class='fa fa-code'></i>Firmware\",\"columns\":[{\"formatter\":\"link\",\"formatterParams\":{\"labelField\":\"$localip\",\"urlPrefix\":\"http://\",\"target\":\"_blank\"},\"title\":\"ip&nbsp;&nbsp;<i class='fa fa-globe'></i>\",\"field\":\"$localip\",\"width\":100,\"headerVertical\":\"flip\",\"headerTooltip\":\"device local IP-Address ($localip)\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"title\":\"mac&nbsp;&nbsp;<i class='fa fa-barcode'></i>\",\"field\":\"$mac\",\"width\":100,\"headerVertical\":\"flip\",\"headerTooltip\":\"device mac address ($mac)\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"title\":\"SSID&nbsp;&nbsp;<i class='fa fa-wifi'></i>\",\"field\":\"SSID\",\"width\":100,\"headerVertical\":\"flip\",\"headerTooltip\":\"access point the device device is connected to (provided by http json request)\"},{\"title\":\"firmware&nbsp;&nbsp;<i class='fa fa-code'></i>\",\"field\":\"name\",\"width\":100,\"headerVertical\":\"flip\",\"headerTooltip\":\"name of the firmware ($fw/name)\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"title\":\"version&nbsp;&nbsp;<i class='fa fa-code-fork'></i>\",\"field\":\"version\",\"width\":100,\"headerVertical\":\"flip\",\"headerTooltip\":\"version of the firmware ($fw/version)\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"title\":\"homie&nbsp;&nbsp;<i class='fa fa-rss-square'></i>\",\"field\":\"$homie\",\"width\":100,\"align\":\"left\",\"headerVertical\":\"flip\",\"headerTooltip\":\"homie version ($version)\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"title\":\"platform&nbsp;&nbsp;<i class='fa fa-microchip'></i>\",\"field\":\"$implementation\",\"width\":100,\"align\":\"left\",\"headerVertical\":\"flip\",\"headerTooltip\":\"name of the platform ($implementation)\",\"tooltip\":true,\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"title\":\"boot&nbsp;&nbsp;<i class='fa  fa-exclamation-triangle'></i>\",\"field\":\"lastBootCause\",\"width\":100,\"headerVertical\":\"flip\",\"headerTooltip\":\"last cause of reboot (provided by http json request)\"},{\"title\":\"reset&nbsp;&nbsp;<i class='fa fa-power-off'></i>\",\"field\":\"resetReason\",\"width\":100,\"headerVertical\":\"flip\",\"headerTooltip\":\"last reason of reset (provided by http json request)\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"title\":\"reset #&nbsp;&nbsp;<i class='fa fa-sort-numeric-asc'>\",\"field\":\"resetTotal\",\"width\":100,\"headerVertical\":\"flip\",\"headerTooltip\":\"number of resets (provided by resetCounter node)\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"title\":\"a.uptime&nbsp;&nbsp;<i class='fa fa-clock-o'>\",\"field\":\"resetAverage\",\"width\":100,\"headerVertical\":\"flip\",\"headerTooltip\":\"average uptime between resets (provided by resetCounter node)\",\"formatter\":\"function(cell, formatterParams, onRendered){     var pad = function (num) {         return (\\\"0\\\"+num).slice(-2);     };     var secs = Number(cell.getValue());     if (Number.isNaN(secs)) return;     var minutes = Math.floor(secs / 60);     secs = secs%60;     var hours = Math.floor(minutes/60);     minutes = minutes%60;     var days = Math.floor(hours/24);     hours = hours%24;     if (days>0)         return days+\\\"d \\\"+pad(hours)+\\\":\\\"+pad(minutes);     else         return pad(hours)+\\\":\\\"+pad(minutes)+\\\":\\\"+pad(secs); }\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"},{\"formatterParams\":{\"min\":0,\"max\":100,\"color\":[\"red\",\"orange\",\"green\"],\"legend\":\"function (value) {     if (value>0)         return \\\"<span style='color:#FFFFFF;'>\\\"+Number(value).toFixed(2)+\\\" %</span>\\\";     else         return; }\",\"legendColor\":\"#101010\",\"legendAlign\":\"center\"},\"formatter\":\"progress\",\"title\":\"sleep %&nbsp;&nbsp;<i class='fa fa-moon-o'></i>\",\"field\":\"sleepRatio\",\"width\":100,\"headerVertical\":\"flip\",\"headerTooltip\":\"ratio between sleep and awake (provided by sleepTimer node)\",\"headerContext\":\"function(e,column){ this.send({ui_control:{callback:'headerContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:column._column.field}); e.preventDefault(); }\"}]}],\"columnResized\":\"function(column){     var newColumn = {         field: column._column.field,         visible: column._column.visible,         width: column._column.width,         widthFixed: column._column.widthFixed,         widthStyled: column._column.widthStyled     }; this.send({topic:this.config.topic,ui_control:{callback:'columnResized',columnWidths:newColumn}}); }\",\"columnMoved\":\"function(column, columns){     var newColumns=[];     columns.forEach(function (column) {         newColumns.push({'field': column._column.definition.field, 'title': column._column.definition.title});     });     this.send({topic:this.config.topic,ui_control:{callback:'columnMoved',columns:newColumns}}); }\",\"rowFormatter\":\"function(row){     var data = row.getData();     switch (data.$state) {         case \\\"lost\\\":             row.getElement().style.backgroundColor = \\\"#9e2e66\\\";             row.getElement().style.color = \\\"#a6a6a6\\\";             break;         case \\\"sleeping\\\":             row.getElement().style.backgroundColor = \\\"#336699\\\";             break;         case \\\"disconnected\\\":             row.getElement().style.backgroundColor = \\\"#cc3300\\\";             row.getElement().style.color = \\\"#a6a6a6\\\";             break;         case \\\"alert\\\":             row.getElement().style.backgroundColor = \\\"#A6A6DF\\\";             break;         case \\\"init\\\":             row.getElement().style.backgroundColor = \\\"#f2f20d\\\";             break;         case \\\"ready\\\":             row.getElement().style.backgroundColor = \\\"\\\";             row.getElement().style.color = \\\"\\\";             break;         } }\",\"rowContext\":\"function(e, row){     this.send({ui_control:{callback:'rowContext'},position:{\\\"x\\\":e.x,\\\"y\\\":e.y},payload:{\\\"$name\\\":row._row.data.$name,\\\"$localip\\\":row._row.data.$localip,\\\"name\\\":row._row.data.name},\\\"topic\\\":row._row.data.$topic});     e.preventDefault(); }\",\"cellEdited\":\"function(cell){     this.send({ui_control:{callback:'cellEdited'},         payload:cell._cell.value,         \\\"oldValue\\\":cell._cell.oldValue,         \\\"field\\\":cell._cell.column.field,         \\\"$topic\\\":cell._cell.row.data.$topic}); }\"}}",
+                "type": "json"
+            },
+            {
+                "name": "tableDataProp",
+                "value": "state",
+                "type": "str"
+            }
+        ],
+        "x": 408,
+        "y": 1292,
+        "wires": [
+            [
+                "90e3c8cd.8287a8",
+                "85c3998c.c6d768"
+            ],
+            [
+                "69cccd2b.cae4c4"
+            ]
+        ]
+    },
+    {
+        "id": "e6740516.9b1688",
+        "type": "switch",
+        "z": "9d52d40a.a63668",
+        "name": "callback",
+        "property": "ui_control.callback",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "rowContext",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "headerContext",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "cellEdited",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "columnMoved",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "columnResized",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 5,
+        "x": 179,
+        "y": 1530,
+        "wires": [
+            [
+                "5bf60e7.23625f"
+            ],
+            [
+                "f246c2d4.aa89c"
+            ],
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "749057bc.c4a6d8",
+        "type": "switch",
+        "z": "9d52d40a.a63668",
+        "name": "",
+        "property": "payload.command",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "updateDevice",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "updateDevices",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "deleteDevice",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "ignoreDevice",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "unIgnoreDevice",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "refreshTable",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "deleteTable",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "columnHide",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "columnsUnHide",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "columnUnHide",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "restoreColumnOrder",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "resetColumnWidth",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "setResponsiveLayout",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 13,
+        "x": 781,
+        "y": 1530,
+        "wires": [
+            [
+                "28af0304.acdeec"
+            ],
+            [
+                "28af0304.acdeec"
+            ],
+            [
+                "c59b8c64.16dc7"
+            ],
+            [
+                "c59b8c64.16dc7"
+            ],
+            [
+                "c59b8c64.16dc7"
+            ],
+            [
+                "c59b8c64.16dc7"
+            ],
+            [
+                "6a44f1d4.72a75"
+            ],
+            [
+                "c59b8c64.16dc7"
+            ],
+            [
+                "c59b8c64.16dc7"
+            ],
+            [
+                "c59b8c64.16dc7"
+            ],
+            [
+                "c59b8c64.16dc7"
+            ],
+            [
+                "c59b8c64.16dc7"
+            ],
+            [
+                "c59b8c64.16dc7"
+            ]
+        ]
+    },
+    {
+        "id": "c59b8c64.16dc7",
+        "type": "link out",
+        "z": "9d52d40a.a63668",
+        "name": "toTable",
+        "links": [
+            "b1750dea.ac9c2"
+        ],
+        "x": 950,
+        "y": 1530,
+        "wires": []
+    },
+    {
+        "id": "bfbc2876.2e7748",
+        "type": "link in",
+        "z": "9d52d40a.a63668",
+        "name": "aquire",
+        "links": [
+            "28af0304.acdeec"
+        ],
+        "x": 253,
+        "y": 510,
+        "wires": [
+            [
+                "923430d4.60b79"
+            ]
+        ]
+    },
+    {
+        "id": "28af0304.acdeec",
+        "type": "link out",
+        "z": "9d52d40a.a63668",
+        "name": "toAquire",
+        "links": [
+            "bfbc2876.2e7748",
+            "82fc1784.d3c078"
+        ],
+        "x": 950,
+        "y": 1445,
+        "wires": []
+    },
+    {
+        "id": "13055b32.2932e5",
+        "type": "link out",
+        "z": "9d52d40a.a63668",
+        "name": "toPlugins",
+        "links": [
+            "b563fdad.d0b7c"
+        ],
+        "x": 1154,
+        "y": 1683,
+        "wires": []
+    },
+    {
+        "id": "418512d5.1f8b6c",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "rowCommand",
+        "func": "// as this feeds back to the beginning of the flow it is time for a new message object\n// otherwise new and old data mix\n// all command data fills into a payload so it would unlikly survice verry long ;)\n\nvar msgOut={};\nswitch (msg.topic){\n    case 'unIgnoreDevice':\n        msgOut={\n            topic:msg.payload,\n            payload:{\n                \"command\":msg.topic,\n                \"object\":msg.payload\n            }\n        };\n        break;\n    case 'deleteTable':\n    case 'updateDevice':\n    case 'deleteDevice':\n    case 'ignoreDevice':\n        msgOut={\n            topic:msg.sourceMsg.topic,\n            socketid:msg.socketid,\n            payload:{\n                \"command\":msg.topic,\n                \"object\":msg.sourceMsg.topic,\n                \"$localip\":msg.sourceMsg.payload.$localip,\n                \"$name\":msg.sourceMsg.payload.$name,\n                \"name\":msg.sourceMsg.payload.name\n            }\n        };\n        break;\n    default:\n        msgOut={\n            topic:msg.sourceMsg.rowData.$topic,\n            payload:{\n                \"command\":msg.topic,\n                \"object\":msg.sourceMsg.$topic,\n                \"$localip\":msg.sourceMsg.payload.$localip,\n                \"$name\":msg.sourceMsg.payload.$name,\n                \"name\":msg.sourceMsg.payload.name,\n            }\n        }\n}\nnode.status({fill:\"green\",shape:\"dot\",text:msgOut.payload.command});\nreturn msgOut;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 607,
+        "y": 1513,
+        "wires": [
+            [
+                "749057bc.c4a6d8",
+                "61b6cd67.e87d74"
+            ]
+        ]
+    },
+    {
+        "id": "bc9395ce.412d28",
+        "type": "mqtt in",
+        "z": "9d52d40a.a63668",
+        "name": "",
+        "topic": "wallpanel/#",
+        "qos": "2",
+        "datatype": "utf8",
+        "broker": "6389f524.8a4e3c",
+        "x": 162,
+        "y": 374,
+        "wires": [
+            [
+                "9908423d.9f0a"
+            ]
+        ]
+    },
+    {
+        "id": "466c4805.365698",
+        "type": "link out",
+        "z": "9d52d40a.a63668",
+        "name": "toWatchdog",
+        "links": [
+            "b563fdad.d0b7c"
+        ],
+        "x": 644,
+        "y": 374,
+        "wires": []
+    },
+    {
+        "id": "f6219bae.e768e8",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "translate mqtt (wallpanel)",
+        "func": "var topicSplitted = msg.topic.split('/');\n\n// IMPORTTANT! \n// Make shure that the topic matches the topic of homie state node that the extra data is merged correctly!\nmsg.topic=\"mqtt://192.168.2.14:1883/\"+topicSplitted[0]+\"/\"+topicSplitted[1];\n\n// -------------------------------------------------------------------\n// this function node can be used as a template for json data via mqtt\n// assumes a topic structure as <base>/<deviceName>/...\n// -------------------------------------------------------------------\n\n// transloator definition (json objects -> state data)\n// leave \"translateTo\" empty if the value should be droped\n// property = proeprty of source\n// translateTo = property of msg.state[translateTo]\n\nvar translator = {\n    \"state\":{\n        \"currentUrl\":{\"translateTo\":\"$localip\"},\n        \"screenOn\":{\"translateTo\":\"screenOn\"},\n        \"brightness\":{\"translateTo\":\"brightness\"}\n    },\n    \"sensor\":{\n        \"battery\":{\n            \"value\":{\"translateTo\":\"battery\"},\n            \"unit\":{\"translateTo\":\"\"},\n            \"charging\":{\"translateTo\":\"charging\"},\n            \"acPlugged\":{\"translateTo\":\"acPlugged\"},\n            \"usbPlugged\":{\"translateTo\":\"usbPlugged\"}\n        },\n        \"motion\":{\n            \"value\":{\"translateTo\":\"motion\"}\n        }\n    }\n}\n\n// --------------------------------------------------\n// other defaults not related to json data\n\nmsg.state={\"$name\":topicSplitted[1]};\nmsg.state.$implementation=\"WallPanel\";\nmsg.state.name=\"Android App\";\nmsg.state.version=\"0.9.1 Build 0\";\nmsg.state.$state=\"ready\";\n\n// --------------------------------------------------\nvar readValues = function(currentTranslator,level) {\n    for (var property in currentTranslator) {\n        if (currentTranslator.hasOwnProperty(property)) {\n            if (level===topicSplitted.length) { // end of branch, we expect data here\n                if (currentTranslator[property].translateTo!==\"\"){\n                    msg.state[currentTranslator[property].translateTo]=msg.payload[property];\n                }\n            } else if (topicSplitted[level]===property) { // step up to next branch\n                readValues(currentTranslator[property],level+1)\n            }\n        }\n    }\n}\nreadValues(translator,2); // start on level 2 -> this is where the data should start\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 484,
+        "y": 374,
+        "wires": [
+            [
+                "466c4805.365698",
+                "f73e708e.f0b8"
+            ]
+        ],
+        "icon": "node-red/swap.svg",
+        "info": "# translator for the wallpanel android app\n## decription\nWallpanel is a fantastic open source android app to show the Node-RED dashboard on any android device in kiosk mode. In addition it comes with mqtt support to read sensor data depending of the capabilities of your device and the ability to receive commnads\nfor more information you find the project here (https://thanksmister.com/wallpanel-android/)\n\n## limitations\n- **wallpanel** do not offer LWT support jet. So detection of $state is verry difficult epecially when your android device is not offering sensor data to detect a timeout. Use the $sate watchdog to emulate LWT\n- **wallpanel** do not offer signal strength readings (WiFi)\n- **no data conversion** Data conversion (i.e. voltage in %). Example can be found in the gerneric translator\n\n## homie features\n- `$name` *string* Name of the device\n- `battery` *integer* Status of the battery in %\n- `$localip` *string* the dashboard the wallpanel is pointing at. *this is not the ip of the android device!*\n\n## extended features\n- `charging` *boolean* indicator if the battery is charging\n- `acPlugged` *boolean* indicator if the device is plugged it ac power (?)\n- `usbPlugged` *boolean* indicator if the device is plugged into usb (?)\n- `screenOn` *boolean* state of the screen (you can use a camera based motion detection, great!)\n- `screenBrightness` *integer* current brightness of the screen\n- `motion` *boolean* state of the motion sensor"
+    },
+    {
+        "id": "9908423d.9f0a",
+        "type": "json",
+        "z": "9d52d40a.a63668",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 288,
+        "y": 374,
+        "wires": [
+            [
+                "f6219bae.e768e8",
+                "d96e0b5b.ae6ae8"
+            ]
+        ]
+    },
+    {
+        "id": "4b103b82.d5f934",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "colCommand",
+        "func": "// as this feeds back to the beginning of the flow it is time for a new message object\n// otherwise new and old data mix\n// all command data fills into a payload so it would unlikly survice verry long ;)\n\nvar msgOut={\n    topic:\"columnRightClick\",\n    payload:{\n        \"command\":msg.topic,\n        \"object\":msg.payload\n    }\n}\n\n// some commands need the column from the prosition where the context menu was triggered\n\nswitch (msg.topic){\n    case \"columnHide\":\n        msgOut.payload.object=msg.sourceMsg.payload;\n        break;\n}\nnode.status({fill:\"green\",shape:\"dot\",text:msgOut.payload.command});\nreturn msgOut;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 614,
+        "y": 1564,
+        "wires": [
+            [
+                "749057bc.c4a6d8",
+                "b6f10d4c.dde98"
+            ]
+        ]
+    },
+    {
+        "id": "430f3c7c.5622d4",
+        "type": "ui_context_menu",
+        "z": "9d52d40a.a63668",
+        "group": "3e8e6acd.3587c6",
+        "order": 1,
+        "width": 0,
+        "height": -1,
+        "fontSize": 16,
+        "position": "msg",
+        "outputField": "payload",
+        "xCoordinate": "500",
+        "yCoordinate": "450",
+        "menu": "msg",
+        "menuItems": [
+            {
+                "id": "2",
+                "icon": "fa-plus-square",
+                "label": "unhide all columns",
+                "topic": "columnsUnHide",
+                "payload": "",
+                "payloadType": "str",
+                "visible": true,
+                "enabled": true
+            },
+            {
+                "id": "3",
+                "icon": "fa-recycle",
+                "label": "refresh Table",
+                "topic": "refreshTable",
+                "payload": "",
+                "payloadType": "str",
+                "visible": true,
+                "enabled": true
+            },
+            {
+                "id": "4",
+                "icon": "fa-table",
+                "label": "delete table",
+                "topic": "deleteTable",
+                "payload": "",
+                "payloadType": "str",
+                "visible": true,
+                "enabled": true
+            }
+        ],
+        "colors": "theme",
+        "textColor": "#000000",
+        "backgroundColor": "#ffffff",
+        "borderColor": "#626262",
+        "intervalLength": "2",
+        "intervalUnit": "secs",
+        "startTimerAtOpen": false,
+        "startTimerAtLeave": true,
+        "stopTimerAtEnter": true,
+        "name": "msgBased",
+        "x": 410,
+        "y": 1615,
+        "wires": [
+            [
+                "4b103b82.d5f934"
+            ]
+        ]
+    },
+    {
+        "id": "84e3502f.6ee37",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "$state watchdog",
+        "func": "// -------------------------------------------------------------------\n// this function provides a timeOut function to emulate the LWT functionality\n// for $state=\"lost\". on every received msg.state.$state it resets the timer\n// if the timer runs out it issues msg.state.$state=\"lost\" and a message to \n// the extra filed msg.state.resetReason\n// can be configured by:\n// msg.state.interval in seconds\n// -------------------------------------------------------------------\n\nif (msg.hasOwnProperty(\"payload\") && msg.payload.hasOwnProperty(\"command\")) {\n    switch (msg.payload.command) {\n        case \"deleteTable\":\n            let lostTimers = context.get(\"lostTimers\") || {};\n            Object.keys(lostTimers).forEach((key,index) => {\n                clearTimeout(lostTimers[key].timer);\n            });\n            context.set(\"lostTimers\",undefined);\n            node.status({fill:\"yellow\",shape:\"dot\",text:\"All timers deleted\"});\n            node.warn(\"[$state watchdog] All timers deleted\");\n            return msg;\n    }\n}\n\nvar timeout=120     // in seconds (set to 0 if you want to disable this feature)\nvar graceTime=60    // give a little extra to avoid false alarms\n\nvar status={fill:\"red\",shape:\"dot\",text:\"\"};\nif (msg.hasOwnProperty(\"state\") && msg.state.hasOwnProperty(\"interval\")) {\n    if (!Number.isNaN(Number(msg.state.interval))) {\n        timeout=Number(msg.state.interval); //*1.5 \n    } else {\n        status.text=\"[$state watchdog] msg.state.interval is NaN\";\n        node.error([status.text,msg]);\n        node.status(status);\n        return msg;\n    }\n}\nvar resetReason=\"device lost! No refresh the last \"+timeout+\"sec\"\n\n// ------------------------------------------------------\n// emulate timeout for $state=\"lost\"\n// ------------------------------------------------------\nfunction mqttTimeout(arg) {\n    arg.node.send(arg.msg);\n}\n    \nif (timeout>0 && msg.hasOwnProperty(\"topic\")) {\n    // we have to keep track on existing timers\n    let lostTimers = context.get(\"lostTimers\"); // allways memoryOnly as the timers do not extist after restart\n    if (lostTimers===undefined) {\n        lostTimers={};\n        context.set(\"lostTimers\",lostTimers);\n    }\n    if (lostTimers.hasOwnProperty(msg.topic)) { // timer exists so clear it first\n        clearTimeout(lostTimers[msg.topic].timer);\n    }\n    if (!lostTimers.hasOwnProperty(msg.topic)) lostTimers[msg.topic]={};\n    lostTimers[msg.topic].timeout=timeout;\n    lostTimers[msg.topic].timer=setTimeout(mqttTimeout+graceTime, timeout*1000, \n        {\n            \"node\":node,\n            \"msg\":{\n                \"topic\":msg.topic,\n                \"state\":{\n                    \"$state\":\"lost\",\n                    \"resetReason\":resetReason\n                }\n                \n            }\n        }\n    );\n    node.status({fill:\"green\",shape:\"dot\",text:msg.topic+\"=\"+timeout+\"s\"});\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 386,
+        "y": 816,
+        "wires": [
+            [
+                "9d9d213d.09396"
+            ]
+        ],
+        "icon": "node-red/swap.svg",
+        "info": "# msg.state.$state watchdog\n## decription\nthis function provides a timeOut function (watchdog) to emulate the LWT functionality\nissueing $state=\"lost\" if a device did not update in time. \non every received msg.state.$state it resets the timer\nif the timer runs out it issues `msg.state.$state=\"lost\"` and a message to \nthe extra filed `msg.state.resetReason`\n\nyou can find more about the [homie convention device lifecyle here](https://homieiot.github.io/specification/#device-lifecycle).\n\n## how to use\n- place it in the main plugin list if you like to have a watchdog for every device with the same timeout\n- place it after a translator / data source if only some devices need a watchdog because they do not supprt mqtt LWT or similar techniques to detect offline devices and set the msg.state.$state correcty over the complete lifecycle.\n- place diffent watchdogs in the aquisition area behind translators if you need **individual timeout durations**.\n- edit the `timeout` variable in the code or\n- send msg.state.interval to set individual timeout by message\n\n## do do / issues\n- have to find out if a clearTimeout / setTimeout on every message is the most efficient way.\n- perhaps own code with one interval timer more efficient for a bigger number of devices\n\n## homie features\n- `$state` *string* current state of the device\n- `interval` *integer* in sec \n\n## extended features\n- `resetReason` *string* description that the device was flaged by the watchdog"
+    },
+    {
+        "id": "f246c2d4.aa89c",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "build column menu",
+        "func": "msg.menu=[\n    {\n        \"text\": \"update devices\",\n        \"icon\": \"fa-undo\",\n        \"enabled\": true,\n        \"topic\": \"updateDevices\",\n    },\n    {\n        \"text\": \"---\"\n    },\n    {\n        \"text\": \"hide column\",\n        \"icon\": \"fa-minus-square\",\n        \"enabled\": true,\n        \"topic\": \"columnHide\",\n    },\n    {\n        \"text\": \"unhide column\",\n        \"icon\": \"fa-minus-square-o\",\n        \"enabled\": (msg.hiddenColumns.length>0) ? true : false,\n        \"sub\": msg.hiddenColumns\n    },\n    {\n        \"text\": \"unhide all columns\",\n        \"icon\": \"fa-minus-square\",\n        \"enabled\": true,\n        \"topic\": \"columnsUnHide\",\n    },\n    {\n        \"text\": \"---\"\n    },\n    {\n        \"text\": \"restore column order\",\n        \"icon\": \"fa-sort fa-rotate-90\",\n        \"enabled\": true,\n        \"topic\": \"restoreColumnOrder\"\n    },\n    {\n        \"text\": \"reset column width\",\n        \"icon\": \"fa-arrows-h\",\n        \"enabled\": true,\n        \"topic\": \"resetColumnWidth\"\n    },\n    {\n        \"text\": \"rersponsive layout\",\n        \"icon\": \"fa-mobile\",\n        \"enabled\": true,\n        \"topic\": \"setResponsiveLayout\"\n    },\n    {\n        \"text\": \"refresh table\",\n        \"icon\": \"fa-recycle\",\n        \"enabled\": true,\n        \"topic\": \"refreshTable\"\n    },\n    {\n        \"text\": \"clear table\",\n        \"icon\": \"fa-trash\",\n        \"enabled\": true,\n        \"topic\": \"deleteTable\"\n    }\n];\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 379,
+        "y": 1564,
+        "wires": [
+            [
+                "430f3c7c.5622d4",
+                "90341f51.c352c"
+            ]
+        ]
+    },
+    {
+        "id": "c9b41f12.1c433",
+        "type": "link in",
+        "z": "9d52d40a.a63668",
+        "name": "Plugins",
+        "links": [
+            "677977e5.f274b8",
+            "9cd8d3a8.dbb3d",
+            "9e278daa.10534",
+            "fd874c09.b60e4"
+        ],
+        "x": 134,
+        "y": 867,
+        "wires": [
+            [
+                "9d9d213d.09396"
+            ]
+        ]
+    },
+    {
+        "id": "f9962a15.0fb1e8",
+        "type": "comment",
+        "z": "9d52d40a.a63668",
+        "name": "callbacks & context menus",
+        "info": "",
+        "x": 229,
+        "y": 1411,
+        "wires": []
+    },
+    {
+        "id": "7c3afb42.1732b4",
+        "type": "comment",
+        "z": "9d52d40a.a63668",
+        "name": "ui-tabel",
+        "info": "",
+        "x": 169,
+        "y": 1190,
+        "wires": []
+    },
+    {
+        "id": "5bf60e7.23625f",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "build row menu",
+        "func": "msg.menu=[\n    {\n        \"text\": \"update device\",\n        \"icon\": \"fa-undo\",\n        \"enabled\": true,\n        \"topic\": \"updateDevice\",\n    },\n    {\n        \"text\": \"---\"\n    },\n    {\n        \"text\": \"delete device\",\n        \"icon\": \"fa-trash\",\n        \"enabled\": true,\n        \"topic\": \"deleteDevice\",\n    },\n    {\n        \"text\": \"ignore device\",\n        \"icon\": \"fa-minus-square-o\",\n        \"enabled\": true,\n        \"topic\": \"ignoreDevice\",\n    },\n    {\n        \"text\": \"unignore devices\",\n        \"icon\": \"fa-plus-square-o\",\n        \"enabled\": (msg.ignoredDevices.length>0) ? true : false,\n        \"sub\": msg.ignoredDevices\n    },\n    {\n        \"text\": \"unignore all devices\",\n        \"icon\": \"fa-plus-square\",\n        \"enabled\": true,\n        \"topic\": \"unIgnoreDevices\",\n    },\n    {\n        \"text\": \"---\"\n    },\n    {\n        \"text\": \"refresh table\",\n        \"icon\": \"fa-recycle\",\n        \"enabled\": true,\n        \"topic\": \"refreshTable\"\n    },\n    {\n        \"text\": \"clear table\",\n        \"icon\": \"fa-trash\",\n        \"enabled\": true,\n        \"topic\": \"deleteTable\"\n    }\n];\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 369,
+        "y": 1462,
+        "wires": [
+            [
+                "19e8fb55.948665",
+                "4b6a4466.69800c"
+            ]
+        ]
+    },
+    {
+        "id": "19e8fb55.948665",
+        "type": "ui_context_menu",
+        "z": "9d52d40a.a63668",
+        "group": "3e8e6acd.3587c6",
+        "order": 1,
+        "width": 0,
+        "height": -1,
+        "fontSize": 16,
+        "position": "msg",
+        "outputField": "payload",
+        "xCoordinate": "500",
+        "yCoordinate": "450",
+        "menu": "msg",
+        "menuItems": [
+            {
+                "id": "2",
+                "icon": "fa-plus-square",
+                "label": "unhide all columns",
+                "topic": "columnsUnHide",
+                "payload": "",
+                "payloadType": "str",
+                "visible": true,
+                "enabled": true
+            },
+            {
+                "id": "3",
+                "icon": "fa-recycle",
+                "label": "refresh Table",
+                "topic": "refreshTable",
+                "payload": "",
+                "payloadType": "str",
+                "visible": true,
+                "enabled": true
+            },
+            {
+                "id": "4",
+                "icon": "fa-table",
+                "label": "delete table",
+                "topic": "deleteTable",
+                "payload": "",
+                "payloadType": "str",
+                "visible": true,
+                "enabled": true
+            }
+        ],
+        "colors": "theme",
+        "textColor": "#000000",
+        "backgroundColor": "#ffffff",
+        "borderColor": "#626262",
+        "intervalLength": "2",
+        "intervalUnit": "secs",
+        "startTimerAtOpen": false,
+        "startTimerAtLeave": true,
+        "stopTimerAtEnter": true,
+        "name": "msgBased",
+        "x": 410,
+        "y": 1513,
+        "wires": [
+            [
+                "418512d5.1f8b6c"
+            ]
+        ]
+    },
+    {
+        "id": "f28d6d58.f27d8",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "ccuOut",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 332,
+        "y": 663,
+        "wires": []
+    },
+    {
+        "id": "b4f3194a.c9e198",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "ccuOut translated",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 634,
+        "y": 663,
+        "wires": []
+    },
+    {
+        "id": "e917f701.848748",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "httpOut translated",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 1059,
+        "y": 544,
+        "wires": []
+    },
+    {
+        "id": "d96e0b5b.ae6ae8",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "json in (mqtt)",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 444,
+        "y": 408,
+        "wires": []
+    },
+    {
+        "id": "f73e708e.f0b8",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "json translated",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 709,
+        "y": 408,
+        "wires": []
+    },
+    {
+        "id": "5e8155d9.d2b8bc",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "simple mqtt",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 801,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "f6956de0.9b59d",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "homie device",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 631,
+        "y": 221,
+        "wires": []
+    },
+    {
+        "id": "52619ce0.5df084",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "homie state",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 444,
+        "y": 34,
+        "wires": []
+    },
+    {
+        "id": "2074fe0f.a481a2",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "to ui_table handler",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 600,
+        "y": 1122,
+        "wires": []
+    },
+    {
+        "id": "6f074131.3df08",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "clicked on cell",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 998,
+        "y": 1190,
+        "wires": []
+    },
+    {
+        "id": "ab78269b.859828",
+        "type": "link in",
+        "z": "9d52d40a.a63668",
+        "name": "callbacksIn",
+        "links": [
+            "69cccd2b.cae4c4"
+        ],
+        "x": 66,
+        "y": 1530,
+        "wires": [
+            [
+                "e6740516.9b1688",
+                "620ab579.114dbc"
+            ]
+        ]
+    },
+    {
+        "id": "69cccd2b.cae4c4",
+        "type": "link out",
+        "z": "9d52d40a.a63668",
+        "name": "callbacksOut",
+        "links": [
+            "ab78269b.859828"
+        ],
+        "x": 576,
+        "y": 1343,
+        "wires": []
+    },
+    {
+        "id": "b6f10d4c.dde98",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "colCommand",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 801,
+        "y": 1649,
+        "wires": []
+    },
+    {
+        "id": "7f8fa749.5b4478",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "table callback",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 998,
+        "y": 1224,
+        "wires": []
+    },
+    {
+        "id": "85c3998c.c6d768",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "to ui-table",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 621,
+        "y": 1275,
+        "wires": []
+    },
+    {
+        "id": "61b6cd67.e87d74",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "rowCommand",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 811,
+        "y": 1411,
+        "wires": []
+    },
+    {
+        "id": "620ab579.114dbc",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "callback",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 179,
+        "y": 1598,
+        "wires": []
+    },
+    {
+        "id": "f805d1d2.b99ea",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "extract IP form msg.topic",
+        "func": "if (msg.hasOwnProperty(\"topic\")) {\n    let topicSplitted=msg.topic.split('/');\n    for (let i=0; i<topicSplitted.length; i++) {\n        let partSplitted=topicSplitted[i].split('.');\n        if (partSplitted.length===4) {\n            let ipSplitted=topicSplitted[i].split(':');\n            msg.payload=ipSplitted[0];\n            node.status({fill:\"green\",shape:\"dot\",text:\"request:\"+msg.payload});\n            return msg;\n        }\n    }\n}\nnode.status({fill:\"red\",shape:\"dot\",text:\"noIP found:\"+msg.topic});",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 246,
+        "y": 1802,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7557f75b.5e7358",
+        "type": "comment",
+        "z": "9d52d40a.a63668",
+        "name": "Toolbox",
+        "info": "",
+        "x": 169,
+        "y": 1751,
+        "wires": []
+    },
+    {
+        "id": "edbc167b.5a5748",
+        "type": "ui_toast",
+        "z": "9d52d40a.a63668",
+        "position": "dialog",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": false,
+        "outputs": 1,
+        "ok": "OK",
+        "cancel": "Cancel",
+        "raw": false,
+        "topic": "",
+        "name": "clear table?",
+        "x": 1209,
+        "y": 1598,
+        "wires": [
+            [
+                "6a44f1d4.72a75"
+            ]
+        ]
+    },
+    {
+        "id": "6a44f1d4.72a75",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "confirm",
+        "func": "var originalMsg = context.get('originalMsg');\nif (msg!==undefined && originalMsg===undefined) {\n    var dialogMsg={\n        payload:\"Do you realy whant to delete the complete table and all statistics. Cell edits and layout will be preserved.\",\n        topic:\"CLEAR TABLE\",\n        socketid:msg.socketid\n    };\n    context.set('originalMsg',msg);\n    return [dialogMsg,null];\n} else {\n    context.set('originalMsg',undefined);\n    if (msg.payload===\"OK\") {\n        return [null,originalMsg];\n    }\n}",
+        "outputs": 2,
+        "noerr": 0,
+        "x": 1030,
+        "y": 1649,
+        "wires": [
+            [
+                "edbc167b.5a5748"
+            ],
+            [
+                "13055b32.2932e5"
+            ]
+        ]
+    },
+    {
+        "id": "4b6a4466.69800c",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "rowMenu",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 587,
+        "y": 1462,
+        "wires": []
+    },
+    {
+        "id": "90341f51.c352c",
+        "type": "debug",
+        "z": "9d52d40a.a63668",
+        "name": "rowMenu",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 587,
+        "y": 1615,
+        "wires": []
+    },
+    {
+        "id": "82fc1784.d3c078",
+        "type": "link in",
+        "z": "9d52d40a.a63668",
+        "name": "aquire",
+        "links": [
+            "28af0304.acdeec"
+        ],
+        "x": 117,
+        "y": 119,
+        "wires": [
+            [
+                "4a08e633.a96bc8"
+            ]
+        ]
+    },
+    {
+        "id": "4a08e633.a96bc8",
+        "type": "function",
+        "z": "9d52d40a.a63668",
+        "name": "ask homie for update",
+        "func": "var msgOut={};\nswitch (msg.payload.command){\n    case \"updateDevice\":\n        if (msg.topic && msg.topic.includes('/homie/')) { // seams to be a homie message\n            msgOut = {\n                \"topic\":msg.topic,\n                \"broker\":msg.topic.substring(0,msg.topic.indexOf('/homie/')),\n                \"payload\":msg.payload.$name\n            }\n            return msgOut;\n        }\n        break;\n    case \"updateDevices\":\n        msgOut = {\n            \"topic\":msg.topic,\n            \"payload\":\"[any]\"\n        }\n        return msgOut;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 270,
+        "y": 119,
+        "wires": [
+            [
+                "378305fa.cef78a"
+            ]
+        ]
+    },
+    {
+        "id": "923430d4.60b79",
+        "type": "subflow:e0e6e559.8f30d8",
+        "z": "9d52d40a.a63668",
+        "name": "",
+        "env": [],
+        "x": 408,
+        "y": 493,
+        "wires": [
+            [
+                "5b5d7c00.8b9f34"
+            ]
+        ]
+    },
+    {
+        "id": "3840d6b5.4291da",
+        "type": "homie-convention-broker-config",
+        "z": "",
+        "mqtt-host": "192.168.2.14",
+        "mqtt-port": "1883",
+        "name": "mosquitto@home",
+        "homieName": "Node-RED",
+        "homieRoot": "homie",
+        "storeGlobal": true
+    },
+    {
+        "id": "3e8e6acd.3587c6",
+        "type": "ui_group",
+        "z": "",
+        "name": "Remote Device Table",
+        "tab": "dc3e656c.bbd048",
+        "order": 2,
+        "disp": false,
+        "width": "19",
+        "collapse": false
+    },
+    {
+        "id": "6389f524.8a4e3c",
+        "type": "mqtt-broker",
+        "z": "",
+        "name": "lol-server",
+        "broker": "192.168.2.14",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": true,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    },
+    {
+        "id": "dcd63e8.d157fc",
+        "type": "ccu-connection",
+        "z": "",
+        "name": "ccu2",
+        "host": "192.168.2.5",
+        "regaEnabled": true,
+        "bcrfEnabled": true,
+        "iprfEnabled": true,
+        "virtEnabled": false,
+        "bcwiEnabled": false,
+        "cuxdEnabled": false,
+        "regaPoll": false,
+        "regaInterval": "30",
+        "rpcPingTimeout": "60",
+        "rpcInitAddress": "192.168.2.14",
+        "rpcServerHost": "192.168.2.14",
+        "rpcBinPort": "2059",
+        "rpcXmlPort": "2060",
+        "queueTimeout": "5000",
+        "queuePause": "250",
+        "contextStore": "file"
+    },
+    {
+        "id": "dc3e656c.bbd048",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Remote Device Table",
+        "icon": "dashboard",
+        "order": 19,
+        "disabled": false,
+        "hidden": false
+    }
+]

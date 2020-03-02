@@ -46,38 +46,38 @@ Node-RED flow to display the status of remote devices on the dashboard using ui-
 1. table population
 
    The table is filled and updated dynamically as data arrives. Only new or updated data is sent to the client
-   ![callbacks](./gifs/table-init.gif)
+   ![callbacks](https://raw.githubusercontent.com/Christian-Me/remote-device-table/master/gifs/table-init.gif)
 
 2. table-layout
 
    The table layout can be modified interactively. Beside changing the column width and order you can hide (and un hide) rows and columns.
-   ![callbacks](./gifs/table-layout.gif)
+   ![callbacks](https://raw.githubusercontent.com/Christian-Me/remote-device-table/master/gifs/table-layout.gif)
 
 3. responsive layout
 
    The table can be viewed with horizontal scroll (with frozen columns) or in a responsive layout
-   ![callbacks](./gifs/responsive-layout.gif)
+   ![callbacks](https://raw.githubusercontent.com/Christian-Me/remote-device-table/master/gifs/responsive-layout.gif)
 
 4. table edit
 
    The table cells can be edited (where suitable). The edits are stored separately and are prevented from overwrites
-   ![callbacks](./gifs/table-edit.gif)
+   ![callbacks](https://raw.githubusercontent.com/Christian-Me/remote-device-table/master/gifs/table-edit.gif)
 
 ## theory of operation
 
 The flow is divided in three main parts
 
 1. **data acquisition**: translation of the data into homie and individual user defined fields (not everything fits into the homie convention but it is a good common ground). [different translator nodes can be found here](https://github.com/Christian-Me/remote-device-table/tree/master/translators)
-![callbacks](./screenshots/data_aquisition.png)
+![callbacks](https://raw.githubusercontent.com/Christian-Me/remote-device-table/master/screenshots/data_aquisition.png)
 
 2. **plugins**: little nodes doing all kind of stuff with this data. For example a watchdog, a reset counter, max. min. or avg. uptime, add icons from the values like battery or signal and other things. To make these reusable it is essential to have a common data-set defined. [different plugins can be found here](https://github.com/Christian-Me/remote-device-table/tree/master/plugins)
-![callbacks](./screenshots/plugins.png)
+![callbacks](https://raw.githubusercontent.com/Christian-Me/remote-device-table/master/screenshots/plugins.png)
 
 3. **table handling and ui design**: universal flow to handle table formatting, data storage, column width and order, cell editing and interactive stuff like context menus. [different designs can be found here](https://github.com/Christian-Me/remote-device-table/tree/master/table%20designs)
-![callbacks](./screenshots/ui-table_handler.png)
+![callbacks](https://raw.githubusercontent.com/Christian-Me/remote-device-table/master/screenshots/ui-table_handler.png)
 
 4. **callbacks & context menus**: ui-table callbacks are passed from the second output of the `ui-table handler` to this flow to do display context menus or other do other stuff
-![callbacks](./screenshots/callbacks.png)
+![callbacks](https://raw.githubusercontent.com/Christian-Me/remote-device-table/master/screenshots/callbacks.png)
 
 ## flow design
 
